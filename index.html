@@ -11,8 +11,8 @@
     <style>
         /* Estilos personalizados para efectos visuales */
         .product-card:hover {
-            transform: translateY(-5px); /* Efecto de elevación al pasar el mouse */
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
+            transform: translateY(-5-px); /* Efecto de elevación al pasar el mouse */
+            box-shadow: 0 10-px 20-px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
         }
         .cart-item:hover {
             background-color: #f8f9fa; /* Color de fondo al pasar el mouse sobre un item del carrito */
@@ -21,19 +21,19 @@
             animation: fadeIn 0.3s ease-in-out; /* Animación de aparición */
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(10-px); }
             to { opacity: 1; transform: translateY(0); }
         }
         /* Estilos personalizados para la barra de scroll del carrito */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 6-px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 3px;
+            border-radius: 3-px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555;
@@ -118,7 +118,8 @@
                 </div>
 
                 <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    </div>
+                    <p class="text-center text-gray-500">Cargando productos...</p>
+                </div>
 
                 <div id="noProductsMessage" class="text-center py-10 hidden">
                     <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
@@ -195,60 +196,41 @@
             "Accesorios": "Productos complementarios como herramientas, solventes, y equipos de aplicación."
         };
 
-
-        // Array de objetos representando los productos disponibles (Datos Ficticios)
-        // *** AQUÍ ES DONDE DEBERÍAS REEMPLAZAR ESTOS DATOS CON EL CONTENIDO DE TU ARCHIVO JSON REAL ***
-        // Si tu archivo JSON se llama 'productos.json' y está en la misma carpeta,
-        // podrías cargarlo usando la API Fetch de JavaScript.
-        // Ejemplo (descomenta y adapta si es necesario):
-        /*
-        let products = []; // Inicializa un array vacío
-        fetch('productos.json') // Reemplaza 'productos.json' con el nombre de tu archivo
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
-                }
-                return response.json(); // Parsea la respuesta como JSON
-            })
-            .then(data => {
-                products = data; // Asigna los datos cargados a la variable products
-                filteredProducts = [...products]; // Inicializa filteredProducts con los datos cargados
-                renderProducts(products); // Renderiza los productos después de cargarlos
-            })
-            .catch(error => {
-                console.error("No se pudo cargar el archivo de productos:", error);
-                // Mostrar un mensaje de error en la interfaz si la carga falla
-                document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos.</p>';
-            });
-        */
-        // Mientras tanto, usamos estos datos de ejemplo:
-        const products = [
-            { id: 101, name: 'Recubrimiento Epóxico Industrial EP-100', category: 'Epoxicos', price: 5500, description: 'Epóxico 100% sólidos para pisos de concreto.', presentation: 'Galón', color: 'Gris Claro', finish: 'Brillante', base: 'Epóxico', rendimiento: 20, secado: '24 hrs', compatibleWith: ['Catalizador EP-CAT'] , image: 'https://via.placeholder.com/150?text=Epoxico' },
-            { id: 102, name: 'Catalizador para Epóxico EP-CAT', category: 'Epoxicos', price: 1500, description: 'Catalizador para Recubrimiento Epóxico Industrial EP-100.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Epóxico', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
-            { id: 201, name: 'Recubrimiento Poliuretano Arquitectónico PU-200', category: 'Poliuretanos', price: 7800, description: 'Poliuretano alifático de alta resistencia a la intemperie.', presentation: 'Galón', color: 'Blanco', finish: 'Satinado', base: 'Poliuretano', rendimiento: 25, secado: '12 hrs', compatibleWith: ['Catalizador PU-CAT'] , image: 'https://via.placeholder.com/150?text=Poliuretano' },
-            { id: 202, name: 'Catalizador para Poliuretano PU-CAT', category: 'Poliuretanos', price: 2200, description: 'Catalizador para Recubrimiento Poliuretano Arquitectónico PU-200.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Poliuretano', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
-            { id: 301, name: 'Pintura Acrílica Tráfico AC-300', category: 'Acrilicos', price: 1200, description: 'Pintura acrílica base agua para señalización vial.', presentation: 'Cubeta 19L', color: 'Amarillo Tráfico', finish: 'Mate', base: 'Agua', rendimiento: 30, secado: '1 hr', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Acrilico' },
-            { id: 401, name: 'Primario Epóxico Anticorrosivo PR-400', category: 'Primarios', price: 4500, description: 'Primario epóxico rico en zinc para protección de metales.', presentation: 'Galón', color: 'Rojo Óxido', finish: 'Mate', base: 'Epóxico', rendimiento: 15, secado: '8 hrs', compatibleWith: ['Catalizador PR-CAT'] , image: 'https://via.placeholder.com/150?text=Primario' },
-             { id: 402, name: 'Catalizador para Primario PR-CAT', category: 'Primarios', price: 1300, description: 'Catalizador para Primario Epóxico Anticorrosivo PR-400.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Epóxico', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
-            { id: 501, name: 'Rodillo para Epóxicos 9"', category: 'Accesorios', price: 350, description: 'Rodillo de felpa corta resistente a solventes para aplicación de epóxicos.', presentation: 'Pieza', color: 'N/A', finish: 'N/A', base: 'N/A', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Rodillo' },
-             { id: 502, name: 'Brocha para Recortes 2"', category: 'Accesorios', price: 150, description: 'Brocha de cerda natural para recortes en aplicación de recubrimientos.', presentation: 'Pieza', color: 'N/A', finish: 'N/A', base: 'N/A', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Brocha' },
-             { id: 103, name: 'Recubrimiento Epóxico Autonivelante EP-300', category: 'Epoxicos', price: 7000, description: 'Epóxico autonivelante de alto espesor para un acabado liso.', presentation: 'Galón', color: 'Verde Industrial', finish: 'Brillante', base: 'Epóxico', rendimiento: 5, secado: '36 hrs', compatibleWith: ['Catalizador EP-CAT'] , image: 'https://via.placeholder.com/150?text=Epoxico' },
-             { id: 203, name: 'Recubrimiento Poliuretano Alifático PU-300', category: 'Poliuretanos', price: 8500, description: 'Poliuretano alifático de dos componentes para protección de estructuras metálicas.', presentation: 'Galón', color: 'Azul Seguridad', finish: 'Semibrillante', base: 'Poliuretano', rendimiento: 28, secado: '24 hrs', compatibleWith: ['Catalizador PU-CAT'] , image: 'https://via.placeholder.com/150?text=Poliuretano' },
-             { id: 302, name: 'Pintura Acrílica Base Solvente AC-400', category: 'Acrilicos', price: 1500, description: 'Pintura acrílica base solvente de secado rápido para acabados generales.', presentation: 'Galón', color: 'Gris Acero', finish: 'Satinado', base: 'Solvente', rendimiento: 35, secado: '4 hrs', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Acrilico' },
-        ];
-
         // Variables globales para el carrito y productos filtrados
+        let products = []; // Array para almacenar los productos cargados del JSON
         let cart = [];
-        let filteredProducts = [...products]; // Copia inicial de todos los productos
+        let filteredProducts = []; // Array para almacenar los productos filtrados
 
         // Inicializar la aplicación cuando el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
-            // Si descomentas la carga de JSON con fetch, comenta la línea de abajo
-            renderProducts(products); // Renderizar todos los productos al inicio
+            loadProducts(); // Cargar los productos desde el archivo JSON
             setupEventListeners(); // Configurar los listeners de eventos
-            updateCart(); // Actualizar carrito al cargar (por si hay datos guardados)
-             loadCart(); // Cargar carrito desde localStorage
+            loadCart(); // Cargar carrito desde localStorage
         });
+
+        // Función para cargar productos desde el archivo JSON
+        function loadProducts() {
+            fetch('csvjson.json') // Ruta a tu archivo JSON
+                .then(response => {
+                    // Verificar si la respuesta es correcta (código 200-299)
+                    if (!response.ok) {
+                        throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
+                    }
+                    return response.json(); // Parsea la respuesta como JSON
+                })
+                .then(data => {
+                    // Asigna los datos cargados a las variables products y filteredProducts
+                    products = data;
+                    filteredProducts = [...products];
+                    renderProducts(products); // Renderiza los productos después de cargarlos
+                })
+                .catch(error => {
+                    console.error("No se pudo cargar el archivo de productos:", error);
+                    // Mostrar un mensaje de error en la interfaz si la carga falla
+                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "csvjson.json" esté en la misma carpeta.</p>';
+                });
+        }
+
 
          // Guardar carrito en localStorage
         function saveCart() {
@@ -261,7 +243,7 @@
             if (savedCart) {
                 cart = JSON.parse(savedCart);
                 updateCart();
-                 renderProducts(filteredProducts); // Re-renderizar productos para actualizar botones "Agregado"
+                 // No renderProducts aquí, se hace después de cargar los productos
             }
         }
 
@@ -284,7 +266,7 @@
                 // Filtrar productos basados en el término de búsqueda (nombre o descripción)
                 const filtered = filteredProducts.filter(product =>
                     product.name.toLowerCase().includes(searchTerm) ||
-                    product.description.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm)) || // Verificar si description existe
                     (product.category && product.category.toLowerCase().includes(searchTerm)) ||
                     (product.presentation && product.presentation.toLowerCase().includes(searchTerm)) ||
                     (product.color && product.color.toLowerCase().includes(searchTerm)) ||
@@ -372,10 +354,10 @@
                 productCard.innerHTML = `
                     <div class="p-4">
                         <div class="h-40 bg-gray-100 flex items-center justify-center mb-4">
-                            <img src="${product.image}" alt="${product.name}" class="h-full object-contain">
+                             <img src="${product.image || 'https://via.placeholder.com/150?text=No+Image'}" alt="${product.name}" class="h-full object-contain">
                         </div>
                         <h3 class="font-semibold text-lg mb-1 text-gray-800">${product.name}</h3>
-                        <p class="text-gray-600 text-sm mb-2">${product.description}</p>
+                        <p class="text-gray-600 text-sm mb-2">${product.description || 'Sin descripción'}</p>
                         <div class="text-gray-700 text-xs mt-2 space-y-1">
                             <p><span class="font-semibold">Categoría:</span> ${product.category || 'N/A'}</p>
                             <p><span class="font-semibold">Presentación:</span> ${product.presentation || 'N/A'}</p>
@@ -386,8 +368,7 @@
                             <p><span class="font-semibold">Tiempo de Secado:</span> ${product.secado || 'N/A'}</p>
                         </div>
                         <div class="flex justify-between items-center mt-3">
-                            <span class="font-bold text-indigo-600">$${product.price.toLocaleString()}</span>
-                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
+                            <span class="font-bold text-indigo-600">$${(product.price || 0).toLocaleString()}</span> <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
                                     data-id="${product.id}" ${isInCart ? 'disabled' : ''}>
                                 ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
                             </button>
@@ -472,17 +453,19 @@
 
             // Iterar sobre los items del carrito y renderizarlos
             cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
+                // Asegurar que item.price sea un número antes de multiplicar
+                const itemPrice = parseFloat(item.price) || 0;
+                const itemTotal = itemPrice * item.quantity;
                 subtotal += itemTotal; // Sumar al subtotal
 
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
                 cartItem.innerHTML = `
                     <div class="flex items-center">
-                        <img src="${item.image}" alt="${item.name}" class="w-10 h-10 object-contain mr-3">
+                        <img src="${item.image || 'https://via.placeholder.com/40x40?text=No+Image'}" alt="${item.name}" class="w-10 h-10 object-contain mr-3">
                         <div>
                             <h4 class="text-sm font-medium text-gray-800">${item.name}</h4>
-                            <p class="text-xs text-gray-500">$${item.price.toLocaleString()} x ${item.quantity}</p>
+                            <p class="text-xs text-gray-500">$${itemPrice.toLocaleString()} x ${item.quantity}</p>
                         </div>
                     </div>
                     <div class="flex items-center">
@@ -593,13 +576,13 @@
                 item.name,
                 item.presentation || 'N/A',
                 item.color || 'N/A',
-                `$${item.price.toLocaleString()}`,
+                `$${(parseFloat(item.price) || 0).toLocaleString()}`, // Asegurar que el precio sea número
                 item.quantity,
-                `$${(item.price * item.quantity).toLocaleString()}`
+                `$${((parseFloat(item.price) || 0) * item.quantity).toLocaleString()}` // Asegurar que el precio sea número
             ]);
 
             // Calcular totales
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = cart.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * item.quantity), 0); // Asegurar que el precio sea número
             const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
             const tax = subtotalAfterDiscount * 0.16;
