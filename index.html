@@ -38,17 +38,104 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        /* Estilo para el carrito flotante */
+        .floating-cart-bubble {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Posición en la esquina inferior izquierda */
+            background-color: #4f46e5; /* Indigo 600 */
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        }
+
+        .floating-cart-bubble:hover {
+            transform: scale(1.1);
+        }
+
+        .floating-cart-bubble .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #ef4444; /* Red 500 */
+            color: white;
+            font-size: 0.75rem; /* text-xs */
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 9999px; /* rounded-full */
+        }
+
+        /* Estilo para el panel del carrito emergente */
+        .cart-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente oscuro */
+            z-index: 1000; /* Por encima de todo, excepto quizás modals */
+            display: flex;
+            justify-end; /* Alinea el panel a la derecha */
+        }
+
+        .cart-panel {
+            background-color: white;
+            width: 90%; /* Ancho en móviles */
+            max-width: 400px; /* Ancho máximo en pantallas más grandes */
+            height: 100%;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%); /* Inicialmente fuera de la pantalla */
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .cart-panel.open {
+            transform: translateX(0); /* Entra en la pantalla */
+        }
+
+        .cart-panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+            display: flex;
+            justify-between;
+            align-items: center;
+        }
+
+        .cart-panel-body {
+            flex-grow: 1; /* Ocupa el espacio restante */
+            overflow-y: auto; /* Permite scroll si el contenido es largo */
+            padding: 1rem;
+        }
+
+         .cart-panel-footer {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb; /* gray-200 */
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8">
-        <header class="mb-10">
-            <h1 class="text-4xl font-bold text-center text-indigo-700 mb-2">Cotizador TPS</h1>
-            <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
+        <header class="mb-10 flex flex-col sm:flex-row items-center justify-center">
+            <img src="logotps.png" alt="Logo TPS Recubrimientos" class="h-16 mb-4 sm:mb-0 sm:mr-4">
+            <div>
+                <h1 class="text-4xl font-bold text-center text-indigo-700 mb-2">Cotizador TPS</h1>
+                <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit sticky top-4">
+
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Datos de Cotización</h2>
 
                 <div class="mb-4">
@@ -63,9 +150,17 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
                     <input type="text" id="projectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
-                <div class="mb-6">
+                <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Vendedor</label>
                     <input type="text" id="salespersonName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono del Vendedor</label>
+                    <input type="tel" id="salespersonPhone" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                 <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo del Vendedor</label>
+                    <input type="email" id="salespersonEmail" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
 
@@ -108,8 +203,7 @@
                 </button>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-3"> <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
                     <div class="relative">
                         <input type="text" id="searchProduct" placeholder="Buscar producto..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
@@ -117,7 +211,7 @@
                     </div>
                 </div>
 
-                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <p class="text-center text-gray-500">Cargando productos...</p>
                 </div>
 
@@ -127,49 +221,59 @@
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit sticky top-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">Tu Cotización</h2>
-                    <span id="cartCount" class="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full">0</span>
-                </div>
+            </div>
+    </div>
 
-                <div id="cartItems" class="mb-4 max-h-96 overflow-y-auto custom-scrollbar">
-                    <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
-                </div>
+    <div id="floatingCartBubble" class="floating-cart-bubble">
+        <i class="fas fa-shopping-cart text-2xl"></i>
+        <span id="cartCountBubble" class="cart-count">0</span>
+    </div>
 
+    <div id="cartPanelOverlay" class="cart-panel-overlay hidden">
+        <div id="cartPanel" class="cart-panel">
+            <div class="cart-panel-header">
+                <h2 class="text-xl font-semibold text-gray-800">Tu Cotización</h2>
+                <button id="closeCartPanel" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div id="cartItemsPanel" class="cart-panel-body custom-scrollbar">
+                 <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
+            </div>
+            <div class="cart-panel-footer">
                  <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Descuento Global (%)</label>
-                    <input type="number" id="globalDiscount" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" id="globalDiscountPanel" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 
                 <div class="border-t border-gray-200 pt-4">
                     <div class="flex justify-between mb-2">
                         <span class="text-gray-600">Subtotal:</span>
-                        <span id="subtotal" class="font-medium">$0.00</span>
+                        <span id="subtotalPanel" class="font-medium">$0.00</span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span class="text-gray-600">Descuento:</span>
-                        <span id="discountAmount" class="font-medium text-red-600">-$0.00</span>
+                        <span id="discountAmountPanel" class="font-medium text-red-600">-$0.00</span>
                     </div>
                      <div class="flex justify-between mb-2">
                         <span class="text-gray-600">Subtotal con Descuento:</span>
-                        <span id="subtotalAfterDiscount" class="font-medium">$0.00</span>
+                        <span id="subtotalAfterDiscountPanel" class="font-medium">$0.00</span>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span class="text-gray-600">IVA (16%):</span>
-                        <span id="tax" class="font-medium">$0.00</span>
+                        <span id="taxPanel" class="font-medium">$0.00</span>
                     </div>
                     <div class="flex justify-between text-lg font-semibold">
                         <span class="text-gray-800">Total:</span>
-                        <span id="total" class="text-indigo-600">$0.00</span>
+                        <span id="totalPanel" class="text-indigo-600">$0.00</span>
                     </div>
                 </div>
 
                 <div class="mt-6 space-y-3">
-                    <button id="generatePdf" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
+                    <button id="generatePdfPanel" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
                         <i class="fas fa-file-pdf mr-2"></i> Generar PDF
                     </button>
-                    <button id="clearCart" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center">
+                    <button id="clearCartPanel" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center">
                         <i class="fas fa-trash-alt mr-2"></i> Limpiar Cotización
                     </button>
                 </div>
@@ -177,17 +281,18 @@
         </div>
     </div>
 
+
     <script>
         // Información de la empresa para el PDF
         const companyInfo = {
             name: "TPS Recubrimientos",
-            address: "Calle Ficticia #123, Colonia Industrial, Ciudad, Estado",
-            phone: "55 1234 5678",
-            email: "contacto@tpsrecubrimientos.com",
-            logoUrl: "https://via.placeholder.com/100x50?text=Logo+TPS" // URL ficticia para el logo
+            address: "Calle Ficticia #123, Colonia Industrial, Ciudad, Estado", // Reemplazar con dirección real
+            phone: "55 1234 5678", // Reemplazar con teléfono real
+            email: "contacto@tpsrecubrimientos.com", // Reemplazar con email real
+            logoUrl: "logotps.png" // Ruta al logo de TPS
         };
 
-        // Descripciones generales de categorías
+        // Descripciones generales de categorías (no usadas con tu JSON actual)
         const categoryDescriptions = {
             "Epoxicos": "Recubrimientos de alta resistencia química y mecánica, ideales para pisos industriales y áreas de alto tráfico.",
             "Poliuretanos": "Recubrimientos flexibles y duraderos, con excelente resistencia a la abrasión y a los rayos UV, usados en exteriores y áreas deportivas.",
@@ -235,6 +340,7 @@
          // Guardar carrito en localStorage
         function saveCart() {
             localStorage.setItem('tpsCart', JSON.stringify(cart));
+             updateCartBubbleCount(); // Actualizar el contador de la burbuja al guardar
         }
 
         // Cargar carrito desde localStorage
@@ -245,6 +351,20 @@
                 updateCart();
                  // No renderProducts aquí, se hace después de cargar los productos
             }
+        }
+
+        // Actualizar el contador de la burbuja del carrito flotante
+        function updateCartBubbleCount() {
+             const cartCountBubbleElement = document.getElementById('cartCountBubble');
+             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+             cartCountBubbleElement.textContent = totalItems;
+             // Mostrar/ocultar la burbuja si el carrito está vacío
+             const floatingCartBubble = document.getElementById('floatingCartBubble');
+             if (totalItems > 0) {
+                 floatingCartBubble.classList.remove('hidden');
+             } else {
+                 floatingCartBubble.classList.add('hidden');
+             }
         }
 
 
@@ -271,16 +391,45 @@
                 renderProducts(filtered); // Renderizar productos filtrados por búsqueda
             });
 
-            // Listener para el descuento global
-            document.getElementById('globalDiscount').addEventListener('input', updateCart);
+            // Listener para el descuento global en el panel del carrito
+            document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
 
 
-            // Listener para el botón de generar PDF
-            document.getElementById('generatePdf').addEventListener('click', generatePdf);
+            // Listener para el botón de generar PDF en el panel del carrito
+            document.getElementById('generatePdfPanel').addEventListener('click', generatePdf);
 
-            // Listener para el botón de limpiar carrito
-            document.getElementById('clearCart').addEventListener('click', clearCart);
+            // Listener para el botón de limpiar carrito en el panel del carrito
+            document.getElementById('clearCartPanel').addEventListener('click', clearCart);
+
+            // Listeners para abrir y cerrar el panel del carrito
+            document.getElementById('floatingCartBubble').addEventListener('click', openCartPanel);
+            document.getElementById('closeCartPanel').addEventListener('click', closeCartPanel);
+             document.getElementById('cartPanelOverlay').addEventListener('click', (e) => {
+                // Cerrar si se hace clic fuera del panel
+                if (e.target.id === 'cartPanelOverlay') {
+                    closeCartPanel();
+                }
+            });
         }
+
+        // Abrir panel del carrito
+        function openCartPanel() {
+            document.getElementById('cartPanelOverlay').classList.remove('hidden');
+            // Pequeño retraso para permitir que el display: flex se aplique antes de la transición
+            setTimeout(() => {
+                document.getElementById('cartPanel').classList.add('open');
+            }, 10);
+        }
+
+        // Cerrar panel del carrito
+        function closeCartPanel() {
+            document.getElementById('cartPanel').classList.remove('open');
+            // Esperar a que termine la transición antes de ocultar el overlay
+            document.getElementById('cartPanel').addEventListener('transitionend', () => {
+                 document.getElementById('cartPanelOverlay').classList.add('hidden');
+            }, { once: true }); // Ejecutar el listener solo una vez
+        }
+
 
         // Aplicar filtros
         function applyFilters() {
@@ -376,10 +525,13 @@
                         </div>
                         <div class="flex justify-between items-center mt-3">
                             <span class="font-bold text-indigo-600">$${displayPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
-                                    data-id="${product.Clave}" ${isInCart ? 'disabled' : ''}>
-                                ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
-                            </button>
+                            <div class="flex items-center">
+                                <input type="number" value="1" min="1" class="quantity-input w-16 p-1 border border-gray-300 rounded-md text-center mr-2">
+                                <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
+                                        data-id="${product.Clave}" ${isInCart ? 'disabled' : ''}>
+                                    ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -392,77 +544,91 @@
                 button.addEventListener('click', (e) => {
                     // Obtener el ID del producto desde el atributo data-id (que es la Clave)
                     const productId = parseInt(e.target.getAttribute('data-id'));
-                    addToCart(productId); // Llamar a la función para agregar al carrito
+                    // Obtener la cantidad del input asociado a este botón
+                    const quantityInput = e.target.closest('.flex.items-center').querySelector('.quantity-input');
+                    const quantity = parseInt(quantityInput.value) || 1; // Default a 1 si no es un número válido o está vacío
+                    addToCart(productId, quantity); // Llamar a la función para agregar al carrito con cantidad
                 });
             });
         }
 
-        // Agregar producto al carrito
-        function addToCart(productId) {
+        // Agregar producto al carrito con cantidad
+        function addToCart(productId, quantity = 1) { // Default quantity to 1
              // Encontrar el producto por Clave
             const product = products.find(p => p.Clave === productId);
             if (!product) return; // Salir si el producto no existe
 
             // Verificar si el producto ya está en el carrito usando la Clave
-            const existingItem = cart.find(item => item.Clave === productId);
+            const existingItemIndex = cart.findIndex(item => item.Clave === productId);
 
-            if (existingItem) {
-                existingItem.quantity += 1; // Incrementar cantidad si ya existe
+            if (existingItemIndex > -1) {
+                // Si el item existe, actualizar la cantidad
+                cart[existingItemIndex].quantity += quantity;
             } else {
-                // Agregar nuevo item al carrito con cantidad 1
+                // Agregar nuevo item al carrito con la cantidad especificada
                 cart.push({
                     // Copia todas las propiedades del producto (incluyendo Clave, Descripcion, PrecioPublico)
                     ...product,
-                    quantity: 1
+                    quantity: quantity
                 });
             }
 
             updateCart(); // Actualizar la interfaz del carrito
             renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
              // Usamos la clave "Descripcion" para la notificación
-            showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización`); // Mostrar notificación
+            showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización (${quantity} ${quantity > 1 ? 'unidades' : 'unidad'})`); // Mostrar notificación con cantidad
              saveCart(); // Guardar carrito en localStorage
         }
 
-        // Actualizar carrito
+        // Actualizar carrito (tanto el panel como la burbuja)
         function updateCart() {
-            const cartItemsContainer = document.getElementById('cartItems');
-            const cartCountElement = document.getElementById('cartCount');
-            const subtotalElement = document.getElementById('subtotal');
-            const discountAmountElement = document.getElementById('discountAmount');
-            const subtotalAfterDiscountElement = document.getElementById('subtotalAfterDiscount');
-            const taxElement = document.getElementById('tax');
-            const totalElement = document.getElementById('total');
-            const generatePdfButton = document.getElementById('generatePdf');
-            const globalDiscountInput = document.getElementById('globalDiscount');
+            const cartItemsPanelContainer = document.getElementById('cartItemsPanel');
+            const cartCountBubbleElement = document.getElementById('cartCountBubble');
+            const subtotalPanelElement = document.getElementById('subtotalPanel');
+            const discountAmountPanelElement = document.getElementById('discountAmountPanel');
+            const subtotalAfterDiscountPanelElement = document.getElementById('subtotalAfterDiscountPanel');
+            const taxPanelElement = document.getElementById('taxPanel');
+            const totalPanelElement = document.getElementById('totalPanel');
+            const generatePdfPanelButton = document.getElementById('generatePdfPanel');
+            const globalDiscountInput = document.getElementById('globalDiscountPanel');
             const globalDiscount = parseFloat(globalDiscountInput.value) || 0;
 
 
-            // Actualizar el contador de items en el carrito
+            // Actualizar el contador de items en la burbuja del carrito
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCountElement.textContent = totalItems;
+            cartCountBubbleElement.textContent = totalItems;
 
             // Habilitar/deshabilitar el botón de generar PDF
-            generatePdfButton.disabled = cart.length === 0;
+            generatePdfPanelButton.disabled = cart.length === 0;
 
-            // Renderizar items del carrito
+             // Mostrar/ocultar la burbuja si el carrito está vacío
+             const floatingCartBubble = document.getElementById('floatingCartBubble');
+             if (totalItems > 0) {
+                 floatingCartBubble.classList.remove('hidden');
+             } else {
+                 floatingCartBubble.classList.add('hidden');
+             }
+
+
+            // Renderizar items del carrito en el panel
             if (cart.length === 0) {
                 // Mostrar mensaje si el carrito está vacío
-                cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>';
+                cartItemsPanelContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>';
                 // Resetear totales
-                subtotalElement.textContent = '$0.00';
-                discountAmountElement.textContent = '-$0.00';
-                subtotalAfterDiscountElement.textContent = '$0.00';
-                taxElement.textContent = '$0.00';
-                totalElement.textContent = '$0.00';
+                subtotalPanelElement.textContent = '$0.00';
+                discountAmountPanelElement.textContent = '-$0.00';
+                subtotalAfterDiscountPanelElement.textContent = '$0.00';
+                taxPanelElement.textContent = '$0.00';
+                totalPanelElement.textContent = '$0.00';
+                 saveCart(); // Guardar carrito vacío
                 return;
             }
 
-            cartItemsContainer.innerHTML = ''; // Limpiar el contenedor de items del carrito
+            cartItemsPanelContainer.innerHTML = ''; // Limpiar el contenedor de items del carrito en el panel
 
             let subtotal = 0;
 
-            // Iterar sobre los items del carrito y renderizarlos
+            // Iterar sobre los items del carrito y renderizarlos en el panel
             cart.forEach(item => {
                 // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
                 const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
@@ -487,7 +653,7 @@
                     </div>
                 `;
 
-                cartItemsContainer.appendChild(cartItem); // Agregar el item al contenedor del carrito
+                cartItemsPanelContainer.appendChild(cartItem); // Agregar el item al contenedor del carrito
             });
 
             // Calcular descuento, impuestos y total
@@ -496,16 +662,16 @@
             const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
             const total = subtotalAfterDiscount + tax; // Calcular total
 
-            // Actualizar la interfaz de los totales
-            subtotalElement.textContent = `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            discountAmountElement.textContent = `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            subtotalAfterDiscountElement.textContent = `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            taxElement.textContent = `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            totalElement.textContent = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            // Actualizar la interfaz de los totales en el panel
+            subtotalPanelElement.textContent = `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            discountAmountPanelElement.textContent = `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            subtotalAfterDiscountPanelElement.textContent = `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            taxPanelElement.textContent = `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            totalPanelElement.textContent = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
 
-            // Agregar event listeners a todos los botones de eliminar item del carrito
-            document.querySelectorAll('.remove-item').forEach(button => {
+            // Agregar event listeners a todos los botones de eliminar item del carrito en el panel
+            document.querySelectorAll('#cartItemsPanel .remove-item').forEach(button => {
                 button.addEventListener('click', (e) => {
                     // Obtener el ID (Clave) del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
                     const productId = parseInt(e.target.closest('button').getAttribute('data-id'));
@@ -534,7 +700,7 @@
                 updateCart(); // Actualizar la interfaz del carrito
                 renderProducts(filteredProducts); // Volver a renderizar productos
                 showNotification('Cotización limpiada'); // Mostrar notificación
-                 saveCart(); // Guardar carrito en localStorage
+                 saveCart(); // Guardar carrito vacío
             }
         }
 
@@ -548,13 +714,51 @@
             const prospectCompany = document.getElementById('prospectCompany').value || 'N/A';
             const projectName = document.getElementById('projectName').value || 'N/A';
             const salespersonName = document.getElementById('salespersonName').value || 'N/A';
-            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
+            const salespersonPhone = document.getElementById('salespersonPhone').value || 'N/A'; // Nuevo campo
+            const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A'; // Nuevo campo
+            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0; // Obtener del panel
 
 
-            // Encabezado del PDF (Información de la empresa)
+            // Encabezado del PDF (Información de la empresa y Logo)
             doc.setFontSize(20);
             doc.setTextColor(40, 53, 147); // Color azul oscuro
             doc.text(companyInfo.name, 14, 20);
+
+            // Añadir Logo (asegúrate de que 'logotps.png' esté accesible)
+            // Necesitas cargar la imagen y añadirla al PDF.
+            // jsPDF addImage puede tomar una URL, pero a veces hay problemas de CORS.
+            // Una forma más robusta es convertir la imagen a Data URL.
+            // Para simplificar, usaremos la URL directa asumiendo que está en la misma carpeta
+            // y no hay problemas de CORS. Si falla, deberás cargarla como Data URL.
+            const img = new Image();
+            img.onload = function() {
+                 // La imagen se ha cargado, ahora podemos añadirla al PDF
+                 // doc.addImage(img, format, x, y, width, height)
+                 // Ajusta las coordenadas (x, y) y el tamaño (width, height) según necesites
+                 doc.addImage(img, 'PNG', 150, 10, 50, 25); // Ejemplo: Posición derecha superior
+
+                 // Continuar generando el resto del PDF después de que el logo se carga
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
+
+                 // Guardar PDF después de añadir todo el contenido
+                 doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+
+                 showNotification('PDF generado con éxito'); // Mostrar notificación de éxito
+
+            };
+            img.onerror = function() {
+                 console.error("Error al cargar la imagen del logo.");
+                 // Si el logo falla, generar el PDF sin él
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
+                  doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+                 showNotification('PDF generado (sin logo debido a error de carga)');
+            };
+            img.src = companyInfo.logoUrl; // Cargar la imagen del logo
+
+        }
+
+        // Función auxiliar para añadir el contenido principal del PDF (llamada después de cargar el logo)
+        function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount) {
 
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
@@ -572,15 +776,17 @@
             doc.text(`Empresa: ${prospectCompany}`, 14, 55);
             doc.text(`Proyecto: ${projectName}`, 14, 59);
             doc.text(`Vendedor: ${salespersonName}`, 14, 63);
+             doc.text(`Teléfono Vendedor: ${salespersonPhone}`, 14, 67); // Nuevo campo
+             doc.text(`Correo Vendedor: ${salespersonEmail}`, 14, 71); // Nuevo campo
 
 
             doc.setFontSize(16);
             doc.setTextColor(40, 53, 147);
-            doc.text('Detalle de la Cotización', 105, 75, { align: 'center' });
+            doc.text('Detalle de la Cotización', 105, 85, { align: 'center' }); // Ajustar posición Y
 
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 85);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 95); // Ajustar posición Y
 
 
             // Tabla de productos
@@ -606,9 +812,7 @@
             // Agregar filas de totales
             tableData.push([
                 { content: 'Subtotal:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                '', // Columna vacía para Presentación, Color
-                '', // Columna vacía para Precio Unitario
-                '', // Columna vacía para Cantidad
+                '', '', '', // Columnas vacías
                 `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
@@ -638,7 +842,7 @@
 
 
             doc.autoTable({
-                startY: 90, // Posición inicial de la tabla después de la información del prospecto
+                startY: 105, // Ajustar posición inicial de la tabla
                 head: [['Producto', 'Presentación', 'Color', 'Precio Unitario', 'Cantidad', 'Total']], // Encabezados de la tabla
                 body: tableData, // Datos de la tabla
                 headStyles: {
@@ -665,15 +869,36 @@
                     doc.setFontSize(10);
                     doc.setTextColor(100);
                     doc.text('Generado por TPS Recubrimientos', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                },
+                 didParseCell: function(data) {
+                    // Alinear verticalmente el contenido de las celdas
+                    data.cell.styles.valign = 'middle';
                 }
             });
 
-            // Guardar PDF
-            doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+            // Añadir comentarios fijos después de la tabla
+            let finalY = doc.lastAutoTable.finalY || 105; // Obtener la posición final de la tabla, o un valor por defecto
 
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            finalY += 15; // Espacio después de la tabla
+            doc.text("Notas Importantes:", 14, finalY);
 
-            showNotification('PDF generado con éxito'); // Mostrar notificación de éxito
+            finalY += 7;
+            doc.text("• Esta cotización es válida por 30 días naturales a partir de la fecha de emisión.", 14, finalY);
+
+            finalY += 7;
+            doc.text("• Los precios indicados están sujetos a modificación sin previo aviso en caso de variación de costos de materia prima o tipo de cambio.", 14, finalY);
+
+            finalY += 7;
+            doc.text("• Cualquier cambio en el alcance del suministro deberá ser formalizado vía correo y podrá implicar ajustes de precio y plazo.", 14, finalY);
+
+            finalY += 7;
+            // Incluir datos del vendedor del formulario
+            doc.text(`• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`, 14, finalY);
+
         }
+
 
         // Mostrar notificación
         function showNotification(message) {
