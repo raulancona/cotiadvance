@@ -85,7 +85,17 @@
             z-index: 1000; /* Por encima de todo, excepto quizás modals */
             display: flex;
             justify-end; /* Alinea el panel a la derecha */
+             /* Animación de entrada/salida */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
+
+         .cart-panel-overlay.visible {
+             visibility: visible;
+             opacity: 1;
+         }
+
 
         .cart-panel {
             background-color: white;
@@ -133,98 +143,123 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div id="appContainer" class="relative">
 
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Datos de Cotización</h2>
+            <div id="step1" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Prospecto</label>
-                    <input type="text" id="prospectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Empresa del Prospecto</label>
-                    <input type="text" id="prospectCompany" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
-                    <input type="text" id="projectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Vendedor</label>
-                    <input type="text" id="salespersonName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono del Vendedor</label>
-                    <input type="tel" id="salespersonPhone" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                </div>
-                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo del Vendedor</label>
-                    <input type="email" id="salespersonEmail" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Filtros</h2>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por palabra clave 1</label>
+                        <input type="text" id="filterKeyword1" placeholder="Ej: Epoxico" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por palabra clave 2</label>
+                        <input type="text" id="filterKeyword2" placeholder="Ej: Blanco" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por palabra clave 3</label>
+                        <input type="text" id="filterKeyword3" placeholder="Ej: Galón" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría (No funcional con JSON actual)</label>
+                        <select id="categoryFilter" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" disabled>
+                            <option value="">Todas las categorías</option>
+                        </select>
+                         <p id="categoryDescription" class="text-sm text-gray-600 mt-2 italic"></p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rango de precios</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="minPrice" placeholder="Mínimo" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                            <span>-</span>
+                            <input type="number" id="maxPrice" placeholder="Máximo" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                        <select id="sortBy" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="name-asc">Nombre (A-Z)</option>
+                            <option value="name-desc">Nombre (Z-A)</option>
+                            <option value="price-asc">Precio (Menor a Mayor)</option>
+                            <option value="price-desc">Precio (Mayor a Menor)</option>
+                        </select>
+                    </div>
+
+                    <button id="applyFilters" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-filter mr-2"></i> Aplicar Filtros
+                    </button>
                 </div>
 
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-3">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
+                         </div>
 
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Filtros</h2>
+                    <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p class="text-center text-gray-500">Cargando productos...</p>
+                    </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select id="categoryFilter" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Todas las categorías</option>
-                        <option value="Epoxicos">Epóxicos</option>
-                        <option value="Poliuretanos">Poliuretanos</option>
-                        <option value="Acrilicos">Acrílicos</option>
-                        <option value="Primarios">Primarios</option>
-                        <option value="Accesorios">Accesorios</option>
-                    </select>
-                     <p id="categoryDescription" class="text-sm text-gray-600 mt-2 italic"></p>
+                    <div id="noProductsMessage" class="text-center py-10 hidden">
+                        <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No se encontraron productos con los filtros aplicados</p>
+                    </div>
                 </div>
+            </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Rango de precios</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="number" id="minPrice" placeholder="Mínimo" class="w-1/2 p-2 border border-gray-300 rounded-md">
-                        <span>-</span>
-                        <input type="number" id="maxPrice" placeholder="Máximo" class="w-1/2 p-2 border border-gray-300 rounded-md">
+            <div id="step2" class="bg-white p-6 rounded-xl shadow-md mt-6 hidden">
+                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Datos de Cotización</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Prospecto</label>
+                        <input type="text" id="prospectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa del Prospecto</label>
+                        <input type="text" id="prospectCompany" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
+                        <input type="text" id="projectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Vendedor</label>
+                        <input type="text" id="salespersonName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono del Vendedor</label>
+                        <input type="tel" id="salespersonPhone" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo del Vendedor</label>
+                        <input type="email" id="salespersonEmail" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-                    <select id="sortBy" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="name-asc">Nombre (A-Z)</option>
-                        <option value="name-desc">Nombre (Z-A)</option>
-                        <option value="price-asc">Precio (Menor a Mayor)</option>
-                        <option value="price-desc">Precio (Mayor a Menor)</option>
-                    </select>
-                </div>
-
-                <button id="applyFilters" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center">
-                    <i class="fas fa-filter mr-2"></i> Aplicar Filtros
-                </button>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-3"> <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
-                    <div class="relative">
-                        <input type="text" id="searchProduct" placeholder="Buscar producto..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                <div class="mt-6 flex justify-between">
+                    <button id="backToCart" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i> Volver al Carrito
+                    </button>
+                    <div>
+                        <button id="generatePdfBtn" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center mr-2 disabled:opacity-50" disabled>
+                            <i class="fas fa-file-pdf mr-2"></i> Generar PDF
+                        </button>
+                         <button id="sendWhatsappBtn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
+                            <i class="fab fa-whatsapp mr-2"></i> Enviar por WhatsApp
+                        </button>
                     </div>
                 </div>
-
-                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <p class="text-center text-gray-500">Cargando productos...</p>
-                </div>
-
-                <div id="noProductsMessage" class="text-center py-10 hidden">
-                    <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
-                    <p class="text-gray-500">No se encontraron productos con los filtros aplicados</p>
-                </div>
             </div>
 
-            </div>
+        </div>
     </div>
 
-    <div id="floatingCartBubble" class="floating-cart-bubble">
+    <div id="floatingCartBubble" class="floating-cart-bubble hidden">
         <i class="fas fa-shopping-cart text-2xl"></i>
         <span id="cartCountBubble" class="cart-count">0</span>
     </div>
@@ -269,11 +304,11 @@
                     </div>
                 </div>
 
-                <div class="mt-6 space-y-3">
-                    <button id="generatePdfPanel" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
-                        <i class="fas fa-file-pdf mr-2"></i> Generar PDF
+                <div class="mt-6">
+                    <button id="nextToFormBtn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
+                        Siguiente <i class="fas fa-arrow-right ml-2"></i>
                     </button>
-                    <button id="clearCartPanel" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center">
+                     <button id="clearCartPanelBtn" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center mt-3">
                         <i class="fas fa-trash-alt mr-2"></i> Limpiar Cotización
                     </button>
                 </div>
@@ -292,25 +327,24 @@
             logoUrl: "logotps.png" // Ruta al logo de TPS
         };
 
-        // Descripciones generales de categorías (no usadas con tu JSON actual)
-        const categoryDescriptions = {
-            "Epoxicos": "Recubrimientos de alta resistencia química y mecánica, ideales para pisos industriales y áreas de alto tráfico.",
-            "Poliuretanos": "Recubrimientos flexibles y duraderos, con excelente resistencia a la abrasión y a los rayos UV, usados en exteriores y áreas deportivas.",
-            "Acrilicos": "Recubrimientos de secado rápido y buena adherencia, comunes en aplicaciones arquitectónicas y señalización.",
-            "Primarios": "Capas base diseñadas para mejorar la adherencia y la durabilidad de los recubrimientos posteriores.",
-            "Accesorios": "Productos complementarios como herramientas, solventes, y equipos de aplicación."
-        };
-
         // Variables globales para el carrito y productos filtrados
         let products = []; // Array para almacenar los productos cargados del JSON
         let cart = [];
         let filteredProducts = []; // Array para almacenar los productos filtrados
+
+        // Elementos del DOM para los pasos
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const floatingCartBubble = document.getElementById('floatingCartBubble');
+        const cartPanelOverlay = document.getElementById('cartPanelOverlay');
+        const cartPanel = document.getElementById('cartPanel');
 
         // Inicializar la aplicación cuando el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
             loadProducts(); // Cargar los productos desde el archivo JSON
             setupEventListeners(); // Configurar los listeners de eventos
             loadCart(); // Cargar carrito desde localStorage
+            updateCartBubbleCount(); // Asegurar que la burbuja muestre el conteo inicial
         });
 
         // Función para cargar productos desde el archivo JSON
@@ -356,10 +390,9 @@
         // Actualizar el contador de la burbuja del carrito flotante
         function updateCartBubbleCount() {
              const cartCountBubbleElement = document.getElementById('cartCountBubble');
-             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+             const totalItems = cart.reduce((sum, item) => item.quantity > 0 ? sum + item.quantity : sum, 0); // Sumar solo si la cantidad es > 0
              cartCountBubbleElement.textContent = totalItems;
              // Mostrar/ocultar la burbuja si el carrito está vacío
-             const floatingCartBubble = document.getElementById('floatingCartBubble');
              if (totalItems > 0) {
                  floatingCartBubble.classList.remove('hidden');
              } else {
@@ -370,83 +403,129 @@
 
         // Configurar event listeners
         function setupEventListeners() {
-            // Listener para el botón de aplicar filtros
+            // Listeners para los 3 inputs de filtro
+            document.getElementById('filterKeyword1').addEventListener('input', applyFilters);
+            document.getElementById('filterKeyword2').addEventListener('input', applyFilters);
+            document.getElementById('filterKeyword3').addEventListener('input', applyFilters);
+
+            // Listener para el botón de aplicar filtros (aunque el input event ya lo hace)
             document.getElementById('applyFilters').addEventListener('click', applyFilters);
 
-             // Listener para el cambio en el filtro de categoría para mostrar descripción
+             // Listener para el cambio en el filtro de categoría para mostrar descripción (No funcional con JSON actual)
             document.getElementById('categoryFilter').addEventListener('change', (e) => {
                 const selectedCategory = e.target.value;
                 const descriptionElement = document.getElementById('categoryDescription');
-                descriptionElement.textContent = categoryDescriptions[selectedCategory] || '';
+                // NOTA: categoryDescriptions no se usa con tu JSON actual
+                descriptionElement.textContent = ''; // Siempre vacío ya que no hay descripciones por categoría
             });
 
-            // Listener para la barra de búsqueda
-            document.getElementById('searchProduct').addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase(); // Obtener término de búsqueda en minúsculas
-                // Filtrar productos basados en el término de búsqueda (solo Descripción en este JSON)
-                const filtered = filteredProducts.filter(product =>
-                    // Usamos la clave "Descripcion" de tu JSON
-                    (product.Descripcion && product.Descripcion.toLowerCase().includes(searchTerm))
-                );
-                renderProducts(filtered); // Renderizar productos filtrados por búsqueda
-            });
+            // Listener para el ordenamiento
+            document.getElementById('sortBy').addEventListener('change', applyFilters);
+
 
             // Listener para el descuento global en el panel del carrito
             document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
 
 
-            // Listener para el botón de generar PDF en el panel del carrito
-            document.getElementById('generatePdfPanel').addEventListener('click', generatePdf);
-
-            // Listener para el botón de limpiar carrito en el panel del carrito
-            document.getElementById('clearCartPanel').addEventListener('click', clearCart);
-
             // Listeners para abrir y cerrar el panel del carrito
-            document.getElementById('floatingCartBubble').addEventListener('click', openCartPanel);
+            floatingCartBubble.addEventListener('click', openCartPanel);
             document.getElementById('closeCartPanel').addEventListener('click', closeCartPanel);
-             document.getElementById('cartPanelOverlay').addEventListener('click', (e) => {
+             cartPanelOverlay.addEventListener('click', (e) => {
                 // Cerrar si se hace clic fuera del panel
                 if (e.target.id === 'cartPanelOverlay') {
                     closeCartPanel();
                 }
             });
+
+            // Listener para el botón "Siguiente" en el panel del carrito
+            document.getElementById('nextToFormBtn').addEventListener('click', goToFormStep);
+
+            // Listener para el botón "Volver al Carrito" en el formulario
+            document.getElementById('backToCart').addEventListener('click', backToCartStep);
+
+            // Listeners para los botones de generar PDF y enviar por WhatsApp en el formulario
+            document.getElementById('generatePdfBtn').addEventListener('click', generatePdf);
+            document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsappQuote);
+
+             // Listener para el botón de limpiar carrito en el panel del carrito
+            document.getElementById('clearCartPanelBtn').addEventListener('click', clearCart);
         }
 
         // Abrir panel del carrito
         function openCartPanel() {
-            document.getElementById('cartPanelOverlay').classList.remove('hidden');
+            cartPanelOverlay.classList.remove('hidden');
+             cartPanelOverlay.classList.add('visible'); // Añadir clase para la transición de opacidad
             // Pequeño retraso para permitir que el display: flex se aplique antes de la transición
             setTimeout(() => {
-                document.getElementById('cartPanel').classList.add('open');
+                cartPanel.classList.add('open');
             }, 10);
         }
 
         // Cerrar panel del carrito
         function closeCartPanel() {
-            document.getElementById('cartPanel').classList.remove('open');
+            cartPanel.classList.remove('open');
             // Esperar a que termine la transición antes de ocultar el overlay
-            document.getElementById('cartPanel').addEventListener('transitionend', () => {
-                 document.getElementById('cartPanelOverlay').classList.add('hidden');
+            cartPanel.addEventListener('transitionend', () => {
+                 cartPanelOverlay.classList.remove('visible'); // Remover clase de opacidad
+                 cartPanelOverlay.classList.add('hidden'); // Ocultar completamente después de la transición
             }, { once: true }); // Ejecutar el listener solo una vez
         }
 
+        // Transición al paso del formulario
+        function goToFormStep() {
+            if (cart.length === 0) {
+                showNotification('Agrega productos al carrito antes de continuar.', 'bg-yellow-500');
+                return;
+            }
+            closeCartPanel(); // Cerrar el panel del carrito
+            step1.classList.add('hidden'); // Ocultar paso 1
+            step2.classList.remove('hidden'); // Mostrar paso 2
 
-        // Aplicar filtros
+             // Habilitar/deshabilitar botones de PDF y WhatsApp si hay items en el carrito
+            const generatePdfBtn = document.getElementById('generatePdfBtn');
+            const sendWhatsappBtn = document.getElementById('sendWhatsappBtn');
+             if (cart.length > 0) {
+                 generatePdfBtn.disabled = false;
+                 sendWhatsappBtn.disabled = false;
+             } else {
+                 generatePdfBtn.disabled = true;
+                 sendWhatsappBtn.disabled = true;
+             }
+        }
+
+        // Transición de vuelta al paso del carrito
+        function backToCartStep() {
+            step2.classList.add('hidden'); // Ocultar paso 2
+            step1.classList.remove('hidden'); // Mostrar paso 1
+            // Opcional: abrir el panel del carrito de nuevo
+            // openCartPanel();
+        }
+
+
+        // Aplicar filtros y ordenamiento
         function applyFilters() {
-            const category = document.getElementById('categoryFilter').value; // Valor del filtro de categoría
-            // Valores del filtro de precio (convertir a número, 0 si está vacío para mínimo, Infinity para máximo)
+            const keyword1 = document.getElementById('filterKeyword1').value.toLowerCase();
+            const keyword2 = document.getElementById('filterKeyword2').value.toLowerCase();
+            const keyword3 = document.getElementById('filterKeyword3').value.toLowerCase();
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
-            const sortBy = document.getElementById('sortBy').value; // Valor del ordenamiento
+            const sortBy = document.getElementById('sortBy').value;
 
-            // Filtrar productos por categoría (no disponible en este JSON) y rango de precio
+            // Filtrar productos: deben coincidir con todas las palabras clave ingresadas y el rango de precio
             filteredProducts = products.filter(product => {
-                // NOTA: El filtro por categoría no funcionará con tu JSON actual, ya que no tiene clave "category"
-                const matchesCategory = !category; // Siempre true si no se selecciona categoría
-                // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
+                const description = (product.Descripcion || '').toLowerCase();
                 const price = parseFloat((product.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+
+                // Verificar si la descripción incluye todas las palabras clave (si se ingresaron)
+                const matchesKeywords =
+                    (!keyword1 || description.includes(keyword1)) &&
+                    (!keyword2 || description.includes(keyword2)) &&
+                    (!keyword3 || description.includes(keyword3));
+
+                // Verificar si el precio está dentro del rango
                 const matchesPrice = price >= minPrice && price <= maxPrice;
-                return matchesCategory && matchesPrice;
+
+                return matchesKeywords && matchesPrice;
             });
 
             // Ordenar los productos filtrados
@@ -458,20 +537,18 @@
 
         // Ordenar productos
         function sortProducts(products, sortBy) {
-            const [field, order] = sortBy.split('-'); // Separar campo y orden (asc/desc)
+            const [field, order] = sortBy.split('-'); // Separar campo y orden (name/price - asc/desc)
 
             products.sort((a, b) => {
                 if (field === 'name') {
                     // Ordenar por Nombre (Descripcion) alfabéticamente
-                    // Usamos la clave "Descripcion" de tu JSON
                     return order === 'asc'
-                        ? (a.Descripcion || '').localeCompare(b.Descripcion || '') // Usar '' si la descripción es null/undefined
+                        ? (a.Descripcion || '').localeCompare(b.Descripcion || '')
                         : (b.Descripcion || '').localeCompare(a.Descripcion || '');
                 } else if (field === 'price') {
                     // Ordenar por PrecioPublico numéricamente
-                     // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
-                    const priceA = parseFloat((a.PrecioPublico || '0').toString().replace(',', '.')) || 0; // Convertir a número, 0 si no es válido
-                    const priceB = parseFloat((b.PrecioPublico || '0').toString().replace(',', '.')) || 0; // Convertir a número, 0 si no es válido
+                    const priceA = parseFloat((a.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+                    const priceB = parseFloat((b.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                     return order === 'asc'
                         ? priceA - priceB
                         : priceB - priceA;
@@ -480,7 +557,7 @@
             });
         }
 
-        // Renderizar productos
+        // Renderizar productos en la interfaz
         function renderProducts(productsToRender) {
             const container = document.getElementById('productsContainer');
             const noProductsMessage = document.getElementById('noProductsMessage');
@@ -526,7 +603,7 @@
                         <div class="flex justify-between items-center mt-3">
                             <span class="font-bold text-indigo-600">$${displayPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             <div class="flex items-center">
-                                <input type="number" value="1" min="1" class="quantity-input w-16 p-1 border border-gray-300 rounded-md text-center mr-2">
+                                <input type="number" value="${isInCart ? cart.find(item => item.Clave === product.Clave).quantity : 1}" min="1" class="quantity-input w-16 p-1 border border-gray-300 rounded-md text-center mr-2">
                                 <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
                                         data-id="${product.Clave}" ${isInCart ? 'disabled' : ''}>
                                     ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
@@ -547,10 +624,44 @@
                     // Obtener la cantidad del input asociado a este botón
                     const quantityInput = e.target.closest('.flex.items-center').querySelector('.quantity-input');
                     const quantity = parseInt(quantityInput.value) || 1; // Default a 1 si no es un número válido o está vacío
+
+                    // Deshabilitar el botón y cambiar texto inmediatamente al agregar
+                    button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    button.classList.add('bg-gray-400');
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-check mr-1"></i> Agregado';
+
                     addToCart(productId, quantity); // Llamar a la función para agregar al carrito con cantidad
                 });
             });
+
+             // Agregar event listeners a los inputs de cantidad en las tarjetas de producto
+             document.querySelectorAll('.quantity-input').forEach(input => {
+                 input.addEventListener('change', (e) => {
+                     // Cuando cambia la cantidad en la tarjeta, si el producto ya está en el carrito, actualizarlo
+                     const productId = parseInt(e.target.closest('.product-card').querySelector('.add-to-cart').getAttribute('data-id'));
+                     const newQuantity = parseInt(e.target.value) || 1;
+                     updateCartItemQuantity(productId, newQuantity);
+                 });
+             });
         }
+
+        // Actualizar cantidad de un item en el carrito desde la tarjeta de producto
+        function updateCartItemQuantity(productId, newQuantity) {
+             const existingItemIndex = cart.findIndex(item => item.Clave === productId);
+             if (existingItemIndex > -1) {
+                 if (newQuantity > 0) {
+                     cart[existingItemIndex].quantity = newQuantity;
+                 } else {
+                     // Si la cantidad es 0 o menos, eliminar el item
+                     cart.splice(existingItemIndex, 1);
+                 }
+                 updateCart(); // Actualizar la interfaz del carrito
+                 saveCart(); // Guardar cambios
+                 // No re-renderizar productos aquí para evitar perder el estado del input de cantidad
+             }
+        }
+
 
         // Agregar producto al carrito con cantidad
         function addToCart(productId, quantity = 1) { // Default quantity to 1
@@ -574,7 +685,7 @@
             }
 
             updateCart(); // Actualizar la interfaz del carrito
-            renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
+            // renderProducts(filteredProducts); // No re-renderizar aquí para mantener el estado de los inputs de cantidad
              // Usamos la clave "Descripcion" para la notificación
             showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización (${quantity} ${quantity > 1 ? 'unidades' : 'unidad'})`); // Mostrar notificación con cantidad
              saveCart(); // Guardar carrito en localStorage
@@ -589,20 +700,20 @@
             const subtotalAfterDiscountPanelElement = document.getElementById('subtotalAfterDiscountPanel');
             const taxPanelElement = document.getElementById('taxPanel');
             const totalPanelElement = document.getElementById('totalPanel');
-            const generatePdfPanelButton = document.getElementById('generatePdfPanel');
+            const nextToFormBtn = document.getElementById('nextToFormBtn');
             const globalDiscountInput = document.getElementById('globalDiscountPanel');
             const globalDiscount = parseFloat(globalDiscountInput.value) || 0;
 
 
             // Actualizar el contador de items en la burbuja del carrito
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalItems = cart.reduce((sum, item) => item.quantity > 0 ? sum + item.quantity : sum, 0);
             cartCountBubbleElement.textContent = totalItems;
 
-            // Habilitar/deshabilitar el botón de generar PDF
-            generatePdfPanelButton.disabled = cart.length === 0;
+            // Habilitar/deshabilitar el botón "Siguiente" si hay items en el carrito
+            nextToFormBtn.disabled = cart.length === 0 || totalItems === 0;
+
 
              // Mostrar/ocultar la burbuja si el carrito está vacío
-             const floatingCartBubble = document.getElementById('floatingCartBubble');
              if (totalItems > 0) {
                  floatingCartBubble.classList.remove('hidden');
              } else {
@@ -638,14 +749,15 @@
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
                 cartItem.innerHTML = `
-                    <div class="flex items-center">
+                    <div class="flex items-center flex-grow mr-3">
                         <img src="https://via.placeholder.com/40x40?text=No+Image" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3">
-                        <div>
+                        <div class="flex-grow">
                             <h4 class="text-sm font-medium text-gray-800">${item.Descripcion || 'Producto sin nombre'}</h4>
-                            <p class="text-xs text-gray-500">$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} x ${item.quantity}</p>
+                            <p class="text-xs text-gray-500">$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
                         </div>
                     </div>
                     <div class="flex items-center">
+                         <input type="number" value="${item.quantity}" min="0" class="cart-quantity-input w-16 p-1 border border-gray-300 rounded-md text-center mr-2" data-id="${item.Clave}">
                         <span class="text-sm font-semibold mr-3">$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                          <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.Clave}">
                             <i class="fas fa-times"></i>
@@ -670,7 +782,7 @@
             totalPanelElement.textContent = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
 
-            // Agregar event listeners a todos los botones de eliminar item del carrito en el panel
+            // Agregar event listeners a los botones de eliminar item del carrito en el panel
             document.querySelectorAll('#cartItemsPanel .remove-item').forEach(button => {
                 button.addEventListener('click', (e) => {
                     // Obtener el ID (Clave) del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
@@ -678,6 +790,16 @@
                     removeFromCart(productId); // Llamar a la función para eliminar del carrito
                 });
             });
+
+             // Agregar event listeners a los inputs de cantidad en el carrito
+             document.querySelectorAll('.cart-quantity-input').forEach(input => {
+                 input.addEventListener('change', (e) => {
+                     const productId = parseInt(e.target.getAttribute('data-id'));
+                     const newQuantity = parseInt(e.target.value) || 0; // Permitir 0 para eliminar
+                     updateCartItemQuantity(productId, newQuantity); // Reutilizar la función
+                 });
+             });
+
 
              saveCart(); // Guardar carrito en localStorage
         }
@@ -725,11 +847,6 @@
             doc.text(companyInfo.name, 14, 20);
 
             // Añadir Logo (asegúrate de que 'logotps.png' esté accesible)
-            // Necesitas cargar la imagen y añadirla al PDF.
-            // jsPDF addImage puede tomar una URL, pero a veces hay problemas de CORS.
-            // Una forma más robusta es convertir la imagen a Data URL.
-            // Para simplificar, usaremos la URL directa asumiendo que está en la misma carpeta
-            // y no hay problemas de CORS. Si falla, deberás cargarla como Data URL.
             const img = new Image();
             img.onload = function() {
                  // La imagen se ha cargado, ahora podemos añadirla al PDF
@@ -790,23 +907,21 @@
 
 
             // Tabla de productos
-            // Usamos las claves de tu JSON para la tabla
             const tableData = cart.map(item => [
-                item.Descripcion || 'N/A', // Clave para el nombre/descripción
+                item.Descripcion || 'N/A', // Descripción del producto
                 'N/A', // Presentación (no en tu JSON)
                 'N/A', // Color (no en tu JSON)
-                `$${(parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Clave para el precio, asegurando que sea número
+                `$${(parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Precio Unitario
                 item.quantity,
-                `$${((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Clave para el precio, asegurando que sea número
+                `$${((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Total por item
             ]);
 
             // Calcular totales
-             // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
-            const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0); // Asegurar que el precio sea número
+            const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
             const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
-            const tax = subtotalAfterDiscount * 0.16;
-            const total = subtotalAfterDiscount + tax;
+            const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
+            const total = subtotalAfterDiscount + tax; // Calcular total
 
 
             // Agregar filas de totales
@@ -853,18 +968,19 @@
                 styles: {
                     cellPadding: 3, // Espaciado interno de las celdas
                     fontSize: 9, // Tamaño de fuente de las celdas
-                    valign: 'middle' // Alineación vertical del contenido de las celdas
+                    valign: 'middle', // Alineación vertical del contenido de las celdas
+                    overflow: 'linebreak' // Permitir que el texto se divida en varias líneas
                 },
                  columnStyles: {
                     // Estilos específicos para cada columna
-                    0: { cellWidth: 'auto' }, // Producto (auto para que se ajuste)
+                    0: { cellWidth: 70 }, // Producto (ajustar ancho si es necesario)
                     1: { cellWidth: 'auto' }, // Presentación (N/A)
                     2: { cellWidth: 'auto' }, // Color (N/A)
                     3: { cellWidth: 'auto', halign: 'right' }, // Precio Unitario
-                    4: { cellWidth: 'auto', halign: 'center' }, // Cantidad
+                    4: { cellWidth: 20, halign: 'center' }, // Cantidad (ancho fijo)
                     5: { cellWidth: 'auto', halign: 'right' } // Total
                 },
-                didDrawPage: function(data) {
+                 didDrawPage: function(data) {
                     // Pie de página
                     doc.setFontSize(10);
                     doc.setTextColor(100);
@@ -873,6 +989,10 @@
                  didParseCell: function(data) {
                     // Alinear verticalmente el contenido de las celdas
                     data.cell.styles.valign = 'middle';
+                     // Asegurar que el texto largo en la primera columna se envuelva
+                    if (data.column.index === 0) {
+                         data.cell.styles.overflow = 'linebreak';
+                    }
                 }
             });
 
@@ -882,6 +1002,12 @@
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
             finalY += 15; // Espacio después de la tabla
+            // Asegurar que los comentarios no se salgan de la página
+            if (finalY + 4 * 7 > doc.internal.pageSize.height - 20) { // Estimar espacio necesario para comentarios
+                 doc.addPage();
+                 finalY = 20; // Reiniciar posición Y en la nueva página
+            }
+
             doc.text("Notas Importantes:", 14, finalY);
 
             finalY += 7;
@@ -899,15 +1025,86 @@
 
         }
 
+        // Función para enviar cotización por WhatsApp
+        function sendWhatsappQuote() {
+             const prospectPhone = document.getElementById('prospectPhone').value; // Asumiendo que añadimos un campo para el teléfono del prospecto
+             const prospectName = document.getElementById('prospectName').value || 'Prospecto';
+             const salespersonName = document.getElementById('salespersonName').value || 'Vendedor';
+
+             // Validar si hay número de teléfono del prospecto
+             if (!prospectPhone || prospectPhone === 'N/A') {
+                 showNotification('Por favor, ingresa el número de teléfono del prospecto para enviar por WhatsApp.', 'bg-yellow-500');
+                 return;
+             }
+
+             // Construir el mensaje de WhatsApp
+             let whatsappMessage = `¡Hola ${prospectName}!\n\nAquí tienes tu cotización de TPS Recubrimientos:\n\n`;
+
+             // Agregar detalles de los items del carrito
+             cart.forEach(item => {
+                 const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+                 const itemTotal = itemPrice * item.quantity;
+                 whatsappMessage += `- ${item.Descripcion || 'Producto sin nombre'} (x${item.quantity}): $${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n`;
+             });
+
+             // Calcular y agregar totales
+             const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
+             const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
+             const discountAmount = subtotal * (globalDiscount / 100);
+             const subtotalAfterDiscount = subtotal - discountAmount;
+             const tax = subtotalAfterDiscount * 0.16;
+             const total = subtotalAfterDiscount + tax;
+
+             whatsappMessage += `\nSubtotal: $${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+             if (globalDiscount > 0) {
+                 whatsappMessage += `\nDescuento (${globalDiscount}%): -$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                 whatsappMessage += `\nSubtotal con Descuento: $${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+             }
+             whatsappMessage += `\nIVA (16%): $${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+             whatsappMessage += `\nTotal: *$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}*`; // Total en negritas
+
+             // Agregar comentarios fijos
+             whatsappMessage += `\n\nNotas Importantes:\n`;
+             whatsappMessage += `• Esta cotización es válida por 30 días naturales a partir de la fecha de emisión.\n`;
+             whatsappMessage += `• Los precios indicados están sujetos a modificación sin previo aviso en caso de variación de costos de materia prima o tipo de cambio.\n`;
+             whatsappMessage += `• Cualquier cambio en el alcance del suministro deberá ser formalizado vía correo y podrá implicar ajustes de precio y plazo.\n`;
+             const salespersonPhone = document.getElementById('salespersonPhone').value || 'N/A';
+             const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A';
+             whatsappMessage += `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
+
+
+             // Codificar el mensaje para la URL de WhatsApp
+             const encodedMessage = encodeURIComponent(whatsappMessage);
+
+             // Construir la URL de WhatsApp (usando +52 por defecto si el número no incluye código de país)
+             const phoneNumber = prospectPhone.startsWith('+') ? prospectPhone : `+52${prospectPhone}`; // Añadir +52 si no tiene código de país
+
+             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+             // Abrir la URL en una nueva pestaña
+             window.open(whatsappUrl, '_blank');
+
+             showNotification('Mensaje de WhatsApp listo para enviar.', 'bg-blue-500');
+        }
+
 
         // Mostrar notificación
-        function showNotification(message) {
+        function showNotification(message, bgColorClass = 'bg-green-600') {
             const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in';
+            notification.className = `fixed bottom-4 right-4 ${bgColorClass} text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in`;
             notification.innerHTML = `
-                <i class="fas fa-check-circle mr-2"></i>
-                <span>${message}</span>
+                <i class="fas fa-info-circle mr-2"></i> <span>${message}</span>
             `;
+
+             // Cambiar icono si es éxito
+            if (bgColorClass === 'bg-green-600') {
+                 notification.querySelector('i').className = 'fas fa-check-circle mr-2';
+            } else if (bgColorClass === 'bg-yellow-500') {
+                 notification.querySelector('i').className = 'fas fa-exclamation-triangle mr-2';
+            } else if (bgColorClass === 'bg-red-600') {
+                 notification.querySelector('i').className = 'fas fa-times-circle mr-2';
+            }
+
 
             document.body.appendChild(notification); // Agregar la notificación al cuerpo del documento
 
@@ -917,7 +1114,7 @@
                 setTimeout(() => {
                     notification.remove();
                 }, 300);
-            }, 3000); // Mostrar durante 3 segundos
+            }, 5000); // Mostrar durante 5 segundos
         }
     </script>
 </body>
