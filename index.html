@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador TPS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Estilos personalizados para efectos visuales */
+        .product-card:hover {
+            transform: translateY(-5px); /* Efecto de elevación al pasar el mouse */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
+        }
+        .cart-item:hover {
+            background-color: #f8f9fa; /* Color de fondo al pasar el mouse sobre un item del carrito */
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out; /* Animación de aparición */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Estilos personalizados para la barra de scroll del carrito */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-10">
+            <h1 class="text-4xl font-bold text-center text-indigo-700 mb-2">Cotizador TPS</h1>
+            <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit sticky top-4">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Datos de Cotización</h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Prospecto</label>
+                    <input type="text" id="prospectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Empresa del Prospecto</label>
+                    <input type="text" id="prospectCompany" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
+                    <input type="text" id="projectName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Vendedor</label>
+                    <input type="text" id="salespersonName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Filtros</h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select id="categoryFilter" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Todas las categorías</option>
+                        <option value="Epoxicos">Epóxicos</option>
+                        <option value="Poliuretanos">Poliuretanos</option>
+                        <option value="Acrilicos">Acrílicos</option>
+                        <option value="Primarios">Primarios</option>
+                        <option value="Accesorios">Accesorios</option>
+                    </select>
+                     <p id="categoryDescription" class="text-sm text-gray-600 mt-2 italic"></p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rango de precios</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="minPrice" placeholder="Mínimo" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" placeholder="Máximo" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                    <select id="sortBy" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="name-asc">Nombre (A-Z)</option>
+                        <option value="name-desc">Nombre (Z-A)</option>
+                        <option value="price-asc">Precio (Menor a Mayor)</option>
+                        <option value="price-desc">Precio (Mayor a Menor)</option>
+                    </select>
+                </div>
+
+                <button id="applyFilters" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-filter mr-2"></i> Aplicar Filtros
+                </button>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
+                    <div class="relative">
+                        <input type="text" id="searchProduct" placeholder="Buscar producto..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+
+                <div id="noProductsMessage" class="text-center py-10 hidden">
+                    <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No se encontraron productos con los filtros aplicados</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit sticky top-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Tu Cotización</h2>
+                    <span id="cartCount" class="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full">0</span>
+                </div>
+
+                <div id="cartItems" class="mb-4 max-h-96 overflow-y-auto custom-scrollbar">
+                    <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
+                </div>
+
+                 <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento Global (%)</label>
+                    <input type="number" id="globalDiscount" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span id="subtotal" class="font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Descuento:</span>
+                        <span id="discountAmount" class="font-medium text-red-600">-$0.00</span>
+                    </div>
+                     <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Subtotal con Descuento:</span>
+                        <span id="subtotalAfterDiscount" class="font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">IVA (16%):</span>
+                        <span id="tax" class="font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-semibold">
+                        <span class="text-gray-800">Total:</span>
+                        <span id="total" class="text-indigo-600">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 space-y-3">
+                    <button id="generatePdf" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
+                        <i class="fas fa-file-pdf mr-2"></i> Generar PDF
+                    </button>
+                    <button id="clearCart" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-trash-alt mr-2"></i> Limpiar Cotización
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Información de la empresa para el PDF
+        const companyInfo = {
+            name: "TPS Recubrimientos",
+            address: "Calle Ficticia #123, Colonia Industrial, Ciudad, Estado",
+            phone: "55 1234 5678",
+            email: "contacto@tpsrecubrimientos.com",
+            logoUrl: "https://via.placeholder.com/100x50?text=Logo+TPS" // URL ficticia para el logo
+        };
+
+        // Descripciones generales de categorías
+        const categoryDescriptions = {
+            "Epoxicos": "Recubrimientos de alta resistencia química y mecánica, ideales para pisos industriales y áreas de alto tráfico.",
+            "Poliuretanos": "Recubrimientos flexibles y duraderos, con excelente resistencia a la abrasión y a los rayos UV, usados en exteriores y áreas deportivas.",
+            "Acrilicos": "Recubrimientos de secado rápido y buena adherencia, comunes en aplicaciones arquitectónicas y señalización.",
+            "Primarios": "Capas base diseñadas para mejorar la adherencia y la durabilidad de los recubrimientos posteriores.",
+            "Accesorios": "Productos complementarios como herramientas, solventes, y equipos de aplicación."
+        };
+
+
+        // Array de objetos representando los productos disponibles (Datos Ficticios)
+        // *** AQUÍ ES DONDE DEBERÍAS REEMPLAZAR ESTOS DATOS CON EL CONTENIDO DE TU ARCHIVO JSON REAL ***
+        // Si tu archivo JSON se llama 'productos.json' y está en la misma carpeta,
+        // podrías cargarlo usando la API Fetch de JavaScript.
+        // Ejemplo (descomenta y adapta si es necesario):
+        /*
+        let products = []; // Inicializa un array vacío
+        fetch('productos.json') // Reemplaza 'productos.json' con el nombre de tu archivo
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
+                }
+                return response.json(); // Parsea la respuesta como JSON
+            })
+            .then(data => {
+                products = data; // Asigna los datos cargados a la variable products
+                filteredProducts = [...products]; // Inicializa filteredProducts con los datos cargados
+                renderProducts(products); // Renderiza los productos después de cargarlos
+            })
+            .catch(error => {
+                console.error("No se pudo cargar el archivo de productos:", error);
+                // Mostrar un mensaje de error en la interfaz si la carga falla
+                document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos.</p>';
+            });
+        */
+        // Mientras tanto, usamos estos datos de ejemplo:
+        const products = [
+            { id: 101, name: 'Recubrimiento Epóxico Industrial EP-100', category: 'Epoxicos', price: 5500, description: 'Epóxico 100% sólidos para pisos de concreto.', presentation: 'Galón', color: 'Gris Claro', finish: 'Brillante', base: 'Epóxico', rendimiento: 20, secado: '24 hrs', compatibleWith: ['Catalizador EP-CAT'] , image: 'https://via.placeholder.com/150?text=Epoxico' },
+            { id: 102, name: 'Catalizador para Epóxico EP-CAT', category: 'Epoxicos', price: 1500, description: 'Catalizador para Recubrimiento Epóxico Industrial EP-100.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Epóxico', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
+            { id: 201, name: 'Recubrimiento Poliuretano Arquitectónico PU-200', category: 'Poliuretanos', price: 7800, description: 'Poliuretano alifático de alta resistencia a la intemperie.', presentation: 'Galón', color: 'Blanco', finish: 'Satinado', base: 'Poliuretano', rendimiento: 25, secado: '12 hrs', compatibleWith: ['Catalizador PU-CAT'] , image: 'https://via.placeholder.com/150?text=Poliuretano' },
+            { id: 202, name: 'Catalizador para Poliuretano PU-CAT', category: 'Poliuretanos', price: 2200, description: 'Catalizador para Recubrimiento Poliuretano Arquitectónico PU-200.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Poliuretano', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
+            { id: 301, name: 'Pintura Acrílica Tráfico AC-300', category: 'Acrilicos', price: 1200, description: 'Pintura acrílica base agua para señalización vial.', presentation: 'Cubeta 19L', color: 'Amarillo Tráfico', finish: 'Mate', base: 'Agua', rendimiento: 30, secado: '1 hr', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Acrilico' },
+            { id: 401, name: 'Primario Epóxico Anticorrosivo PR-400', category: 'Primarios', price: 4500, description: 'Primario epóxico rico en zinc para protección de metales.', presentation: 'Galón', color: 'Rojo Óxido', finish: 'Mate', base: 'Epóxico', rendimiento: 15, secado: '8 hrs', compatibleWith: ['Catalizador PR-CAT'] , image: 'https://via.placeholder.com/150?text=Primario' },
+             { id: 402, name: 'Catalizador para Primario PR-CAT', category: 'Primarios', price: 1300, description: 'Catalizador para Primario Epóxico Anticorrosivo PR-400.', presentation: 'Litro', color: 'N/A', finish: 'N/A', base: 'Epóxico', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Catalizador' },
+            { id: 501, name: 'Rodillo para Epóxicos 9"', category: 'Accesorios', price: 350, description: 'Rodillo de felpa corta resistente a solventes para aplicación de epóxicos.', presentation: 'Pieza', color: 'N/A', finish: 'N/A', base: 'N/A', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Rodillo' },
+             { id: 502, name: 'Brocha para Recortes 2"', category: 'Accesorios', price: 150, description: 'Brocha de cerda natural para recortes en aplicación de recubrimientos.', presentation: 'Pieza', color: 'N/A', finish: 'N/A', base: 'N/A', rendimiento: 'N/A', secado: 'N/A', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Brocha' },
+             { id: 103, name: 'Recubrimiento Epóxico Autonivelante EP-300', category: 'Epoxicos', price: 7000, description: 'Epóxico autonivelante de alto espesor para un acabado liso.', presentation: 'Galón', color: 'Verde Industrial', finish: 'Brillante', base: 'Epóxico', rendimiento: 5, secado: '36 hrs', compatibleWith: ['Catalizador EP-CAT'] , image: 'https://via.placeholder.com/150?text=Epoxico' },
+             { id: 203, name: 'Recubrimiento Poliuretano Alifático PU-300', category: 'Poliuretanos', price: 8500, description: 'Poliuretano alifático de dos componentes para protección de estructuras metálicas.', presentation: 'Galón', color: 'Azul Seguridad', finish: 'Semibrillante', base: 'Poliuretano', rendimiento: 28, secado: '24 hrs', compatibleWith: ['Catalizador PU-CAT'] , image: 'https://via.placeholder.com/150?text=Poliuretano' },
+             { id: 302, name: 'Pintura Acrílica Base Solvente AC-400', category: 'Acrilicos', price: 1500, description: 'Pintura acrílica base solvente de secado rápido para acabados generales.', presentation: 'Galón', color: 'Gris Acero', finish: 'Satinado', base: 'Solvente', rendimiento: 35, secado: '4 hrs', compatibleWith: [] , image: 'https://via.placeholder.com/150?text=Acrilico' },
+        ];
+
+        // Variables globales para el carrito y productos filtrados
+        let cart = [];
+        let filteredProducts = [...products]; // Copia inicial de todos los productos
+
+        // Inicializar la aplicación cuando el DOM esté completamente cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            // Si descomentas la carga de JSON con fetch, comenta la línea de abajo
+            renderProducts(products); // Renderizar todos los productos al inicio
+            setupEventListeners(); // Configurar los listeners de eventos
+            updateCart(); // Actualizar carrito al cargar (por si hay datos guardados)
+             loadCart(); // Cargar carrito desde localStorage
+        });
+
+         // Guardar carrito en localStorage
+        function saveCart() {
+            localStorage.setItem('tpsCart', JSON.stringify(cart));
+        }
+
+        // Cargar carrito desde localStorage
+        function loadCart() {
+            const savedCart = localStorage.getItem('tpsCart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCart();
+                 renderProducts(filteredProducts); // Re-renderizar productos para actualizar botones "Agregado"
+            }
+        }
+
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Listener para el botón de aplicar filtros
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+
+             // Listener para el cambio en el filtro de categoría para mostrar descripción
+            document.getElementById('categoryFilter').addEventListener('change', (e) => {
+                const selectedCategory = e.target.value;
+                const descriptionElement = document.getElementById('categoryDescription');
+                descriptionElement.textContent = categoryDescriptions[selectedCategory] || '';
+            });
+
+            // Listener para la barra de búsqueda
+            document.getElementById('searchProduct').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase(); // Obtener término de búsqueda en minúsculas
+                // Filtrar productos basados en el término de búsqueda (nombre o descripción)
+                const filtered = filteredProducts.filter(product =>
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm) ||
+                    (product.category && product.category.toLowerCase().includes(searchTerm)) ||
+                    (product.presentation && product.presentation.toLowerCase().includes(searchTerm)) ||
+                    (product.color && product.color.toLowerCase().includes(searchTerm)) ||
+                    (product.finish && product.finish.toLowerCase().includes(searchTerm)) ||
+                    (product.base && product.base.toLowerCase().includes(searchTerm))
+                );
+                renderProducts(filtered); // Renderizar productos filtrados por búsqueda
+            });
+
+            // Listener para el descuento global
+            document.getElementById('globalDiscount').addEventListener('input', updateCart);
+
+
+            // Listener para el botón de generar PDF
+            document.getElementById('generatePdf').addEventListener('click', generatePdf);
+
+            // Listener para el botón de limpiar carrito
+            document.getElementById('clearCart').addEventListener('click', clearCart);
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            const category = document.getElementById('categoryFilter').value; // Valor del filtro de categoría
+            // Valores del filtro de precio (convertir a número, 0 si está vacío para mínimo, Infinity para máximo)
+            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+            const sortBy = document.getElementById('sortBy').value; // Valor del ordenamiento
+
+            // Filtrar productos por categoría y rango de precio
+            filteredProducts = products.filter(product => {
+                const matchesCategory = !category || product.category === category;
+                const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+                return matchesCategory && matchesPrice;
+            });
+
+            // Ordenar los productos filtrados
+            sortProducts(filteredProducts, sortBy);
+
+            // Renderizar los productos después de aplicar filtros y ordenar
+            renderProducts(filteredProducts);
+        }
+
+        // Ordenar productos
+        function sortProducts(products, sortBy) {
+            const [field, order] = sortBy.split('-'); // Separar campo y orden (asc/desc)
+
+            products.sort((a, b) => {
+                if (field === 'name') {
+                    // Ordenar por nombre (alfabéticamente)
+                    return order === 'asc'
+                        ? a.name.localeCompare(b.name)
+                        : b.name.localeCompare(a.name);
+                } else if (field === 'price') {
+                    // Ordenar por precio (numéricamente)
+                    return order === 'asc'
+                        ? a.price - b.price
+                        : b.price - a.price;
+                }
+                return 0; // No ordenar si el criterio no es válido
+            });
+        }
+
+        // Renderizar productos
+        function renderProducts(productsToRender) {
+            const container = document.getElementById('productsContainer');
+            const noProductsMessage = document.getElementById('noProductsMessage');
+
+            container.innerHTML = ''; // Limpiar el contenedor actual de productos
+
+            // Mostrar mensaje si no hay productos para renderizar
+            if (productsToRender.length === 0) {
+                noProductsMessage.classList.remove('hidden');
+                return;
+            }
+
+            noProductsMessage.classList.add('hidden'); // Ocultar mensaje si hay productos
+
+            // Iterar sobre los productos y crear su tarjeta HTML
+            productsToRender.forEach(product => {
+                // Verificar si el producto ya está en el carrito
+                const isInCart = cart.some(item => item.id === product.id);
+
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white border border-gray-200 rounded-lg overflow-hidden transition duration-300 ease-in-out';
+                productCard.innerHTML = `
+                    <div class="p-4">
+                        <div class="h-40 bg-gray-100 flex items-center justify-center mb-4">
+                            <img src="${product.image}" alt="${product.name}" class="h-full object-contain">
+                        </div>
+                        <h3 class="font-semibold text-lg mb-1 text-gray-800">${product.name}</h3>
+                        <p class="text-gray-600 text-sm mb-2">${product.description}</p>
+                        <div class="text-gray-700 text-xs mt-2 space-y-1">
+                            <p><span class="font-semibold">Categoría:</span> ${product.category || 'N/A'}</p>
+                            <p><span class="font-semibold">Presentación:</span> ${product.presentation || 'N/A'}</p>
+                            <p><span class="font-semibold">Color:</span> ${product.color || 'N/A'}</p>
+                            <p><span class="font-semibold">Acabado:</span> ${product.finish || 'N/A'}</p>
+                            <p><span class="font-semibold">Base:</span> ${product.base || 'N/A'}</p>
+                             <p><span class="font-semibold">Rendimiento Teórico:</span> ${product.rendimiento || 'N/A'}${product.rendimiento ? ' m²/unidad' : ''}</p>
+                            <p><span class="font-semibold">Tiempo de Secado:</span> ${product.secado || 'N/A'}</p>
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="font-bold text-indigo-600">$${product.price.toLocaleString()}</span>
+                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
+                                    data-id="${product.id}" ${isInCart ? 'disabled' : ''}>
+                                ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(productCard); // Agregar la tarjeta al contenedor
+            });
+
+            // Agregar event listeners a todos los botones de "Agregar al carrito"
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Obtener el ID del producto desde el atributo data-id
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    addToCart(productId); // Llamar a la función para agregar al carrito
+                });
+            });
+        }
+
+        // Agregar producto al carrito
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId); // Encontrar el producto por ID
+            if (!product) return; // Salir si el producto no existe
+
+            // Verificar si el producto ya está en el carrito
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1; // Incrementar cantidad si ya existe
+            } else {
+                // Agregar nuevo item al carrito con cantidad 1
+                cart.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+
+            updateCart(); // Actualizar la interfaz del carrito
+            renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
+            showNotification(`${product.name} agregado a la cotización`); // Mostrar notificación
+             saveCart(); // Guardar carrito en localStorage
+        }
+
+        // Actualizar carrito
+        function updateCart() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartCountElement = document.getElementById('cartCount');
+            const subtotalElement = document.getElementById('subtotal');
+            const discountAmountElement = document.getElementById('discountAmount');
+            const subtotalAfterDiscountElement = document.getElementById('subtotalAfterDiscount');
+            const taxElement = document.getElementById('tax');
+            const totalElement = document.getElementById('total');
+            const generatePdfButton = document.getElementById('generatePdf');
+            const globalDiscountInput = document.getElementById('globalDiscount');
+            const globalDiscount = parseFloat(globalDiscountInput.value) || 0;
+
+
+            // Actualizar el contador de items en el carrito
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountElement.textContent = totalItems;
+
+            // Habilitar/deshabilitar el botón de generar PDF
+            generatePdfButton.disabled = cart.length === 0;
+
+            // Renderizar items del carrito
+            if (cart.length === 0) {
+                // Mostrar mensaje si el carrito está vacío
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>';
+                // Resetear totales
+                subtotalElement.textContent = '$0.00';
+                discountAmountElement.textContent = '-$0.00';
+                subtotalAfterDiscountElement.textContent = '$0.00';
+                taxElement.textContent = '$0.00';
+                totalElement.textContent = '$0.00';
+                return;
+            }
+
+            cartItemsContainer.innerHTML = ''; // Limpiar el contenedor de items del carrito
+
+            let subtotal = 0;
+
+            // Iterar sobre los items del carrito y renderizarlos
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal; // Sumar al subtotal
+
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
+                cartItem.innerHTML = `
+                    <div class="flex items-center">
+                        <img src="${item.image}" alt="${item.name}" class="w-10 h-10 object-contain mr-3">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-800">${item.name}</h4>
+                            <p class="text-xs text-gray-500">$${item.price.toLocaleString()} x ${item.quantity}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm font-semibold mr-3">$${itemTotal.toLocaleString()}</span>
+                        <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                cartItemsContainer.appendChild(cartItem); // Agregar el item al contenedor del carrito
+            });
+
+            // Calcular descuento, impuestos y total
+            const discountAmount = subtotal * (globalDiscount / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
+            const total = subtotalAfterDiscount + tax; // Calcular total
+
+            // Actualizar la interfaz de los totales
+            subtotalElement.textContent = `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            discountAmountElement.textContent = `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            subtotalAfterDiscountElement.textContent = `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            taxElement.textContent = `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            totalElement.textContent = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+
+            // Agregar event listeners a todos los botones de eliminar item del carrito
+            document.querySelectorAll('.remove-item').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Obtener el ID del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
+                    const productId = parseInt(e.target.closest('button').getAttribute('data-id'));
+                    removeFromCart(productId); // Llamar a la función para eliminar del carrito
+                });
+            });
+
+             saveCart(); // Guardar carrito en localStorage
+        }
+
+        // Eliminar producto del carrito
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart(); // Actualizar la interfaz del carrito
+            renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
+             saveCart(); // Guardar carrito en localStorage
+        }
+
+        // Limpiar carrito
+        function clearCart() {
+            if (cart.length === 0) return; // No hacer nada si el carrito ya está vacío
+
+            if (confirm('¿Estás seguro de que deseas limpiar la cotización?')) {
+                cart = []; // Vaciar el array del carrito
+                updateCart(); // Actualizar la interfaz del carrito
+                renderProducts(filteredProducts); // Volver a renderizar productos
+                showNotification('Cotización limpiada'); // Mostrar notificación
+                 saveCart(); // Guardar carrito en localStorage
+            }
+        }
+
+        // Generar PDF
+        function generatePdf() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Obtener datos del prospecto y vendedor
+            const prospectName = document.getElementById('prospectName').value || 'N/A';
+            const prospectCompany = document.getElementById('prospectCompany').value || 'N/A';
+            const projectName = document.getElementById('projectName').value || 'N/A';
+            const salespersonName = document.getElementById('salespersonName').value || 'N/A';
+            const globalDiscount = parseFloat(document.getElementById('globalDiscount').value) || 0;
+
+
+            // Encabezado del PDF (Información de la empresa)
+            doc.setFontSize(20);
+            doc.setTextColor(40, 53, 147); // Color azul oscuro
+            doc.text(companyInfo.name, 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Dirección: ${companyInfo.address}`, 14, 26);
+            doc.text(`Teléfono: ${companyInfo.phone}`, 14, 30);
+            doc.text(`Email: ${companyInfo.email}`, 14, 34);
+
+             // Información del Prospecto y Vendedor en el PDF
+            doc.setFontSize(12);
+            doc.setTextColor(40, 53, 147);
+            doc.text('Datos del Prospecto:', 14, 45);
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(`Nombre: ${prospectName}`, 14, 51);
+            doc.text(`Empresa: ${prospectCompany}`, 14, 55);
+            doc.text(`Proyecto: ${projectName}`, 14, 59);
+            doc.text(`Vendedor: ${salespersonName}`, 14, 63);
+
+
+            doc.setFontSize(16);
+            doc.setTextColor(40, 53, 147);
+            doc.text('Detalle de la Cotización', 105, 75, { align: 'center' });
+
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 85);
+
+
+            // Tabla de productos
+            const tableData = cart.map(item => [
+                item.name,
+                item.presentation || 'N/A',
+                item.color || 'N/A',
+                `$${item.price.toLocaleString()}`,
+                item.quantity,
+                `$${(item.price * item.quantity).toLocaleString()}`
+            ]);
+
+            // Calcular totales
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discountAmount = subtotal * (globalDiscount / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const tax = subtotalAfterDiscount * 0.16;
+            const total = subtotalAfterDiscount + tax;
+
+
+            // Agregar filas de totales
+            tableData.push([
+                { content: 'Subtotal:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                '', // Columna vacía para Cantidad
+                `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+            ]);
+
+            tableData.push([
+                 { content: `Descuento (${globalDiscount}%):`, colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                 '', // Columna vacía para Cantidad
+                 { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
+            ]);
+
+             tableData.push([
+                { content: 'Subtotal con Descuento:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                '', // Columna vacía para Cantidad
+                `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+            ]);
+
+            tableData.push([
+                { content: 'IVA (16%):', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                 '', // Columna vacía para Cantidad
+                `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+            ]);
+
+            tableData.push([
+                { content: 'Total:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                 '', // Columna vacía para Cantidad
+                { content: `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { fontStyle: 'bold', textColor: [40, 53, 147] } } // Color azul oscuro para total
+            ]);
+
+
+            doc.autoTable({
+                startY: 90, // Posición inicial de la tabla después de la información del prospecto
+                head: [['Producto', 'Presentación', 'Color', 'Precio Unitario', 'Cantidad', 'Total']], // Encabezados de la tabla
+                body: tableData, // Datos de la tabla
+                headStyles: {
+                    fillColor: [40, 53, 147], // Color de fondo del encabezado
+                    textColor: 255, // Color del texto del encabezado (blanco)
+                    fontStyle: 'bold' // Estilo de fuente del encabezado
+                },
+                styles: {
+                    cellPadding: 3, // Espaciado interno de las celdas
+                    fontSize: 9, // Tamaño de fuente de las celdas
+                    valign: 'middle' // Alineación vertical del contenido de las celdas
+                },
+                columnStyles: {
+                    // Estilos específicos para cada columna
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 'auto', halign: 'right' },
+                    4: { cellWidth: 'auto', halign: 'center' },
+                    5: { cellWidth: 'auto', halign: 'right' }
+                },
+                didDrawPage: function(data) {
+                    // Pie de página
+                    doc.setFontSize(10);
+                    doc.setTextColor(100);
+                    doc.text('Generado por TPS Recubrimientos', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                }
+            });
+
+            // Guardar PDF
+            doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+
+
+            showNotification('PDF generado con éxito'); // Mostrar notificación de éxito
+        }
+
+        // Mostrar notificación
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification); // Agregar la notificación al cuerpo del documento
+
+            // Ocultar y eliminar la notificación después de un tiempo
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000); // Mostrar durante 3 segundos
+        }
+    </script>
+</body>
+</html>
