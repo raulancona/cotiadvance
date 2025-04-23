@@ -11,8 +11,8 @@
     <style>
         /* Estilos personalizados para efectos visuales */
         .product-card:hover {
-            transform: translateY(-5-px); /* Efecto de elevación al pasar el mouse */
-            box-shadow: 0 10-px 20-px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
+            transform: translateY(-5px); /* Efecto de elevación al pasar el mouse */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Sombra al pasar el mouse */
         }
         .cart-item:hover {
             background-color: #f8f9fa; /* Color de fondo al pasar el mouse sobre un item del carrito */
@@ -21,19 +21,19 @@
             animation: fadeIn 0.3s ease-in-out; /* Animación de aparición */
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10-px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         /* Estilos personalizados para la barra de scroll del carrito */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6-px;
+            width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f1f1;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 3-px;
+            border-radius: 3px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #555;
@@ -227,7 +227,7 @@
                 .catch(error => {
                     console.error("No se pudo cargar el archivo de productos:", error);
                     // Mostrar un mensaje de error en la interfaz si la carga falla
-                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "csvjson.json" esté en la misma carpeta.</p>';
+                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "csvjson.json" esté en la misma carpeta y tenga el formato JSON correcto.</p>';
                 });
         }
 
@@ -263,15 +263,10 @@
             // Listener para la barra de búsqueda
             document.getElementById('searchProduct').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase(); // Obtener término de búsqueda en minúsculas
-                // Filtrar productos basados en el término de búsqueda (nombre o descripción)
+                // Filtrar productos basados en el término de búsqueda (solo Descripción en este JSON)
                 const filtered = filteredProducts.filter(product =>
-                    product.name.toLowerCase().includes(searchTerm) ||
-                    (product.description && product.description.toLowerCase().includes(searchTerm)) || // Verificar si description existe
-                    (product.category && product.category.toLowerCase().includes(searchTerm)) ||
-                    (product.presentation && product.presentation.toLowerCase().includes(searchTerm)) ||
-                    (product.color && product.color.toLowerCase().includes(searchTerm)) ||
-                    (product.finish && product.finish.toLowerCase().includes(searchTerm)) ||
-                    (product.base && product.base.toLowerCase().includes(searchTerm))
+                    // Usamos la clave "Descripcion" de tu JSON
+                    (product.Descripcion && product.Descripcion.toLowerCase().includes(searchTerm))
                 );
                 renderProducts(filtered); // Renderizar productos filtrados por búsqueda
             });
@@ -295,10 +290,13 @@
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
             const sortBy = document.getElementById('sortBy').value; // Valor del ordenamiento
 
-            // Filtrar productos por categoría y rango de precio
+            // Filtrar productos por categoría (no disponible en este JSON) y rango de precio
             filteredProducts = products.filter(product => {
-                const matchesCategory = !category || product.category === category;
-                const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+                // NOTA: El filtro por categoría no funcionará con tu JSON actual, ya que no tiene clave "category"
+                const matchesCategory = !category; // Siempre true si no se selecciona categoría
+                // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
+                const price = parseFloat((product.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+                const matchesPrice = price >= minPrice && price <= maxPrice;
                 return matchesCategory && matchesPrice;
             });
 
@@ -315,15 +313,19 @@
 
             products.sort((a, b) => {
                 if (field === 'name') {
-                    // Ordenar por nombre (alfabéticamente)
+                    // Ordenar por Nombre (Descripcion) alfabéticamente
+                    // Usamos la clave "Descripcion" de tu JSON
                     return order === 'asc'
-                        ? a.name.localeCompare(b.name)
-                        : b.name.localeCompare(a.name);
+                        ? (a.Descripcion || '').localeCompare(b.Descripcion || '') // Usar '' si la descripción es null/undefined
+                        : (b.Descripcion || '').localeCompare(a.Descripcion || '');
                 } else if (field === 'price') {
-                    // Ordenar por precio (numéricamente)
+                    // Ordenar por PrecioPublico numéricamente
+                     // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
+                    const priceA = parseFloat((a.PrecioPublico || '0').toString().replace(',', '.')) || 0; // Convertir a número, 0 si no es válido
+                    const priceB = parseFloat((b.PrecioPublico || '0').toString().replace(',', '.')) || 0; // Convertir a número, 0 si no es válido
                     return order === 'asc'
-                        ? a.price - b.price
-                        : b.price - a.price;
+                        ? priceA - priceB
+                        : priceB - priceA;
                 }
                 return 0; // No ordenar si el criterio no es válido
             });
@@ -346,30 +348,36 @@
 
             // Iterar sobre los productos y crear su tarjeta HTML
             productsToRender.forEach(product => {
-                // Verificar si el producto ya está en el carrito
-                const isInCart = cart.some(item => item.id === product.id);
+                // Verificar si el producto ya está en el carrito usando la clave "Clave"
+                const isInCart = cart.some(item => item.Clave === product.Clave);
 
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card bg-white border border-gray-200 rounded-lg overflow-hidden transition duration-300 ease-in-out';
+
+                // Manejar la coma decimal en el precio para mostrarlo correctamente
+                const displayPrice = parseFloat((product.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+
+
                 productCard.innerHTML = `
                     <div class="p-4">
                         <div class="h-40 bg-gray-100 flex items-center justify-center mb-4">
-                             <img src="${product.image || 'https://via.placeholder.com/150?text=No+Image'}" alt="${product.name}" class="h-full object-contain">
+                             <img src="https://via.placeholder.com/150?text=No+Image" alt="${product.Descripcion || 'Producto sin nombre'}" class="h-full object-contain">
                         </div>
-                        <h3 class="font-semibold text-lg mb-1 text-gray-800">${product.name}</h3>
-                        <p class="text-gray-600 text-sm mb-2">${product.description || 'Sin descripción'}</p>
+                        <h3 class="font-semibold text-lg mb-1 text-gray-800">${product.Descripcion || 'Producto sin nombre'}</h3>
+                        <p class="text-gray-600 text-sm mb-2">${product.Descripcion || 'Sin descripción'}</p>
                         <div class="text-gray-700 text-xs mt-2 space-y-1">
-                            <p><span class="font-semibold">Categoría:</span> ${product.category || 'N/A'}</p>
-                            <p><span class="font-semibold">Presentación:</span> ${product.presentation || 'N/A'}</p>
-                            <p><span class="font-semibold">Color:</span> ${product.color || 'N/A'}</p>
-                            <p><span class="font-semibold">Acabado:</span> ${product.finish || 'N/A'}</p>
-                            <p><span class="font-semibold">Base:</span> ${product.base || 'N/A'}</p>
-                             <p><span class="font-semibold">Rendimiento Teórico:</span> ${product.rendimiento || 'N/A'}${product.rendimiento ? ' m²/unidad' : ''}</p>
-                            <p><span class="font-semibold">Tiempo de Secado:</span> ${product.secado || 'N/A'}</p>
+                            <p><span class="font-semibold">Categoría:</span> N/A</p>
+                            <p><span class="font-semibold">Presentación:</span> N/A</p>
+                            <p><span class="font-semibold">Color:</span> N/A</p>
+                            <p><span class="font-semibold">Acabado:</span> N/A</p>
+                            <p><span class="font-semibold">Base:</span> N/A</p>
+                            <p><span class="font-semibold">Rendimiento Teórico:</span> N/A</p>
+                            <p><span class="font-semibold">Tiempo de Secado:</span> N/A</p>
                         </div>
                         <div class="flex justify-between items-center mt-3">
-                            <span class="font-bold text-indigo-600">$${(product.price || 0).toLocaleString()}</span> <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
-                                    data-id="${product.id}" ${isInCart ? 'disabled' : ''}>
+                            <span class="font-bold text-indigo-600">$${displayPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300"
+                                    data-id="${product.Clave}" ${isInCart ? 'disabled' : ''}>
                                 ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
                             </button>
                         </div>
@@ -382,7 +390,7 @@
             // Agregar event listeners a todos los botones de "Agregar al carrito"
             document.querySelectorAll('.add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    // Obtener el ID del producto desde el atributo data-id
+                    // Obtener el ID del producto desde el atributo data-id (que es la Clave)
                     const productId = parseInt(e.target.getAttribute('data-id'));
                     addToCart(productId); // Llamar a la función para agregar al carrito
                 });
@@ -391,17 +399,19 @@
 
         // Agregar producto al carrito
         function addToCart(productId) {
-            const product = products.find(p => p.id === productId); // Encontrar el producto por ID
+             // Encontrar el producto por Clave
+            const product = products.find(p => p.Clave === productId);
             if (!product) return; // Salir si el producto no existe
 
-            // Verificar si el producto ya está en el carrito
-            const existingItem = cart.find(item => item.id === productId);
+            // Verificar si el producto ya está en el carrito usando la Clave
+            const existingItem = cart.find(item => item.Clave === productId);
 
             if (existingItem) {
                 existingItem.quantity += 1; // Incrementar cantidad si ya existe
             } else {
                 // Agregar nuevo item al carrito con cantidad 1
                 cart.push({
+                    // Copia todas las propiedades del producto (incluyendo Clave, Descripcion, PrecioPublico)
                     ...product,
                     quantity: 1
                 });
@@ -409,7 +419,8 @@
 
             updateCart(); // Actualizar la interfaz del carrito
             renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
-            showNotification(`${product.name} agregado a la cotización`); // Mostrar notificación
+             // Usamos la clave "Descripcion" para la notificación
+            showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización`); // Mostrar notificación
              saveCart(); // Guardar carrito en localStorage
         }
 
@@ -453,8 +464,8 @@
 
             // Iterar sobre los items del carrito y renderizarlos
             cart.forEach(item => {
-                // Asegurar que item.price sea un número antes de multiplicar
-                const itemPrice = parseFloat(item.price) || 0;
+                // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
+                const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                 const itemTotal = itemPrice * item.quantity;
                 subtotal += itemTotal; // Sumar al subtotal
 
@@ -462,15 +473,15 @@
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
                 cartItem.innerHTML = `
                     <div class="flex items-center">
-                        <img src="${item.image || 'https://via.placeholder.com/40x40?text=No+Image'}" alt="${item.name}" class="w-10 h-10 object-contain mr-3">
+                        <img src="https://via.placeholder.com/40x40?text=No+Image" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3">
                         <div>
-                            <h4 class="text-sm font-medium text-gray-800">${item.name}</h4>
-                            <p class="text-xs text-gray-500">$${itemPrice.toLocaleString()} x ${item.quantity}</p>
+                            <h4 class="text-sm font-medium text-gray-800">${item.Descripcion || 'Producto sin nombre'}</h4>
+                            <p class="text-xs text-gray-500">$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} x ${item.quantity}</p>
                         </div>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-sm font-semibold mr-3">$${itemTotal.toLocaleString()}</span>
-                        <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.id}">
+                        <span class="text-sm font-semibold mr-3">$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                         <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.Clave}">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -496,7 +507,7 @@
             // Agregar event listeners a todos los botones de eliminar item del carrito
             document.querySelectorAll('.remove-item').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    // Obtener el ID del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
+                    // Obtener el ID (Clave) del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
                     const productId = parseInt(e.target.closest('button').getAttribute('data-id'));
                     removeFromCart(productId); // Llamar a la función para eliminar del carrito
                 });
@@ -507,7 +518,8 @@
 
         // Eliminar producto del carrito
         function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId);
+             // Usamos la clave "Clave" para identificar el item a eliminar
+            cart = cart.filter(item => item.Clave !== productId);
             updateCart(); // Actualizar la interfaz del carrito
             renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
              saveCart(); // Guardar carrito en localStorage
@@ -572,17 +584,19 @@
 
 
             // Tabla de productos
+            // Usamos las claves de tu JSON para la tabla
             const tableData = cart.map(item => [
-                item.name,
-                item.presentation || 'N/A',
-                item.color || 'N/A',
-                `$${(parseFloat(item.price) || 0).toLocaleString()}`, // Asegurar que el precio sea número
+                item.Descripcion || 'N/A', // Clave para el nombre/descripción
+                'N/A', // Presentación (no en tu JSON)
+                'N/A', // Color (no en tu JSON)
+                `$${(parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Clave para el precio, asegurando que sea número
                 item.quantity,
-                `$${((parseFloat(item.price) || 0) * item.quantity).toLocaleString()}` // Asegurar que el precio sea número
+                `$${((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Clave para el precio, asegurando que sea número
             ]);
 
             // Calcular totales
-            const subtotal = cart.reduce((sum, item) => sum + ((parseFloat(item.price) || 0) * item.quantity), 0); // Asegurar que el precio sea número
+             // Usamos la clave "PrecioPublico" de tu JSON y manejamos la coma decimal
+            const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0); // Asegurar que el precio sea número
             const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
             const tax = subtotalAfterDiscount * 0.16;
@@ -592,31 +606,33 @@
             // Agregar filas de totales
             tableData.push([
                 { content: 'Subtotal:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
+                '', // Columna vacía para Presentación, Color
+                '', // Columna vacía para Precio Unitario
                 '', // Columna vacía para Cantidad
                 `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
             tableData.push([
                  { content: `Descuento (${globalDiscount}%):`, colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', // Columna vacía para Cantidad
+                 '', '', '', // Columnas vacías
                  { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
             ]);
 
              tableData.push([
                 { content: 'Subtotal con Descuento:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                '', // Columna vacía para Cantidad
+                '', '', '', // Columnas vacías
                 `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
             tableData.push([
                 { content: 'IVA (16%):', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', // Columna vacía para Cantidad
+                 '', '', '', // Columnas vacías
                 `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
             tableData.push([
                 { content: 'Total:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', // Columna vacía para Cantidad
+                 '', '', '', // Columnas vacías
                 { content: `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { fontStyle: 'bold', textColor: [40, 53, 147] } } // Color azul oscuro para total
             ]);
 
@@ -635,14 +651,14 @@
                     fontSize: 9, // Tamaño de fuente de las celdas
                     valign: 'middle' // Alineación vertical del contenido de las celdas
                 },
-                columnStyles: {
+                 columnStyles: {
                     // Estilos específicos para cada columna
-                    0: { cellWidth: 'auto' },
-                    1: { cellWidth: 'auto' },
-                    2: { cellWidth: 'auto' },
-                    3: { cellWidth: 'auto', halign: 'right' },
-                    4: { cellWidth: 'auto', halign: 'center' },
-                    5: { cellWidth: 'auto', halign: 'right' }
+                    0: { cellWidth: 'auto' }, // Producto (auto para que se ajuste)
+                    1: { cellWidth: 'auto' }, // Presentación (N/A)
+                    2: { cellWidth: 'auto' }, // Color (N/A)
+                    3: { cellWidth: 'auto', halign: 'right' }, // Precio Unitario
+                    4: { cellWidth: 'auto', halign: 'center' }, // Cantidad
+                    5: { cellWidth: 'auto', halign: 'right' } // Total
                 },
                 didDrawPage: function(data) {
                     // Pie de página
