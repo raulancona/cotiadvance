@@ -153,7 +153,7 @@
             display: block; /* Mostrar solo el paso activo */
         }
 
-         /* Estilo para el modal de agregar producto personalizado */
+         /* Estilo para el modal de agregar producto personalizado y calculadora */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -179,7 +179,7 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             width: 90%;
-            max-width: 400px;
+            max-width: 400px; /* Ancho máximo para ambos modales */
             transform: translateY(-20px);
             transition: transform 0.3s ease-in-out;
         }
@@ -196,6 +196,9 @@
                 <h1 class="text-4xl font-bold text-center text-tpsDarkBlue mb-2">Cotizador TPS</h1>
                 <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
             </div>
+            <button id="openCalculatorModalBtn" class="ml-0 sm:ml-6 mt-4 sm:mt-0 bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center text-sm">
+                 <i class="fas fa-calculator mr-2"></i> Calculadora de Mezclas
+             </button>
         </header>
 
         <div id="appContainer" class="relative">
@@ -403,6 +406,59 @@
         </div>
     </div>
 
+     <div id="calculatorModalOverlay" class="modal-overlay">
+        <div class="modal">
+             <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">Calculadora de Mezclas</h3>
+                <button id="closeCalculatorModalBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Metros Cuadrados a Cubrir (m²)</label>
+                    <input type="number" id="mezclaArea" min="0.01" step="0.01" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Rendimiento por Litro de Mezcla (m²/L)</label>
+                    <input type="number" id="mezclaRendimiento" min="0.01" step="0.01" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Relación de Mezcla (Pintura:Catalizador:Reductor)</label>
+                <div class="flex items-center space-x-2">
+                    <input type="number" id="mezclaParteA" min="0" value="4" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
+                    <span>:</span>
+                    <input type="number" id="mezclaParteB" min="0" value="1" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
+                     <span>:</span>
+                    <input type="number" id="mezclaParteC" min="0" value="0" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
+                </div>
+                 <p class="text-xs text-gray-500 mt-1">Ejemplo: 4:1:0 (sin reductor) o 4:1:1 (con reductor)</p>
+            </div>
+
+            <div class="flex items-center justify-center mb-6">
+                <button id="calcularMezclaBtn" class="bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i> Calcular Mezcla
+                </button>
+            </div>
+
+            <div id="mezclaResultado" class="p-4 bg-gray-100 rounded-md hidden">
+                <h3 class="text-lg font-semibold mb-3 text-gray-800">Resultados:</h3>
+                <p id="mezclaTotalNecesaria" class="text-gray-700 mb-2"></p>
+                <p id="mezclaResultadoParteA" class="text-gray-700 mb-2"></p>
+                <p id="mezclaResultadoParteB" class="text-gray-700 mb-2"></p>
+                <p id="mezclaResultadoParteC" class="text-gray-700"></p>
+            </div>
+
+             <div id="mezclaError" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md hidden">
+                 <p class="font-bold">Error en el cálculo:</p>
+                 <p id="mezclaErrorMessage"></p>
+             </div>
+        </div>
+    </div>
+
 
     <script>
         // Información de la empresa para el PDF
@@ -439,6 +495,24 @@
         const customProductDescriptionInput = document.getElementById('customProductDescription');
         const customProductPriceInput = document.getElementById('customProductPrice');
 
+        // Elementos del DOM para el modal de calculadora
+        const calculatorModalOverlay = document.getElementById('calculatorModalOverlay');
+        const openCalculatorModalBtn = document.getElementById('openCalculatorModalBtn');
+        const closeCalculatorModalBtn = document.getElementById('closeCalculatorModalBtn');
+        const mezclaAreaInput = document.getElementById('mezclaArea');
+        const mezclaRendimientoInput = document.getElementById('mezclaRendimiento');
+        const mezclaParteAInput = document.getElementById('mezclaParteA');
+        const mezclaParteBInput = document.getElementById('mezclaParteB');
+        const mezclaParteCInput = document.getElementById('mezclaParteC');
+        const calcularMezclaBtn = document.getElementById('calcularMezclaBtn');
+        const mezclaResultadoDiv = document.getElementById('mezclaResultado');
+        const mezclaTotalNecesariaP = document.getElementById('mezclaTotalNecesaria');
+        const mezclaResultadoParteAP = document.getElementById('mezclaResultadoParteA');
+        const mezclaResultadoParteBP = document.getElementById('mezclaResultadoParteB');
+        const mezclaResultadoParteCP = document.getElementById('mezclaResultadoParteC');
+        const mezclaErrorDiv = document.getElementById('mezclaError');
+        const mezclaErrorMessageP = document.getElementById('mezclaErrorMessage');
+
 
         // Inicializar la aplicación cuando el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
@@ -450,33 +524,28 @@
 
         // Función para cargar productos desde el archivo JSON
         function loadProducts() {
-            // *** ACTUALIZADO: Cargar desde productos.json ***
             fetch('productos.json') // Ruta a tu archivo JSON
                 .then(response => {
-                    // Verificar si la respuesta es correcta (código 200-299)
                     if (!response.ok) {
-                        // Si hay un error de red o archivo no encontrado
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    return response.json(); // Parsea la respuesta como JSON
+                    return response.json();
                 })
                 .then(data => {
-                    // Verificar si data es un array
                     if (!Array.isArray(data)) {
                         throw new Error("El archivo JSON no contiene un array de productos.");
                     }
-                    // Asigna los datos cargados a las variables products y filteredProducts
                     products = data;
                     filteredProducts = [...products];
                     applyFilters(); // Aplicar filtros iniciales y renderizar la primera página
                 })
                 .catch(error => {
                     console.error("No se pudo cargar el archivo de productos:", error);
-                    // Mostrar un mensaje de error en la interfaz si la carga falla
                     document.getElementById('productsContainer').innerHTML = `<p class="text-red-600 text-center">Error al cargar los productos: ${error.message}. Asegúrate de que "productos.json" esté en la misma carpeta y tenga el formato JSON correcto (un array de objetos).</p>`;
+                     // Ocultar paginación si no se cargan productos
+                    document.getElementById('pagination').classList.add('hidden');
                 });
         }
-
 
          // Guardar carrito en localStorage
         function saveCart() {
@@ -490,7 +559,6 @@
             if (savedCart) {
                 try {
                     cart = JSON.parse(savedCart);
-                    // Asegurarse de que cart es un array
                     if (!Array.isArray(cart)) {
                         cart = [];
                     }
@@ -499,16 +567,14 @@
                     cart = []; // Resetear si hay error al parsear
                 }
                 updateCart();
-                 // No renderProducts aquí, se hace después de cargar los productos
             }
         }
 
         // Actualizar el contador de la burbuja del carrito flotante
         function updateCartBubbleCount() {
              const cartCountBubbleElement = document.getElementById('cartCountBubble');
-             const totalItems = cart.reduce((sum, item) => item.quantity > 0 ? sum + item.quantity : sum, 0); // Sumar solo si la cantidad es > 0
+             const totalItems = cart.reduce((sum, item) => item.quantity > 0 ? sum + item.quantity : sum, 0);
              cartCountBubbleElement.textContent = totalItems;
-             // Mostrar/ocultar la burbuja si el carrito está vacío
              if (totalItems > 0) {
                  floatingCartBubble.classList.remove('hidden');
              } else {
@@ -516,81 +582,71 @@
              }
         }
 
-
         // Configurar event listeners
         function setupEventListeners() {
-            // Listeners para los 3 inputs de filtro
             document.getElementById('filterKeyword1').addEventListener('input', () => { currentPage = 1; applyFilters(); });
             document.getElementById('filterKeyword2').addEventListener('input', () => { currentPage = 1; applyFilters(); });
             document.getElementById('filterKeyword3').addEventListener('input', () => { currentPage = 1; applyFilters(); });
-
-            // Listener para el botón de aplicar filtros (aunque el input event ya lo hace)
             document.getElementById('applyFilters').addEventListener('click', () => { currentPage = 1; applyFilters(); });
-
-            // Listener para el ordenamiento
             document.getElementById('sortBy').addEventListener('change', () => { currentPage = 1; applyFilters(); });
 
-            // Listeners para los botones de paginación
             document.getElementById('prevPageBtn').addEventListener('click', () => {
                 if (currentPage > 1) {
                     currentPage--;
-                    renderProducts(filteredProducts); // Re-renderizar con la nueva página
+                    renderProducts(filteredProducts);
                 }
             });
             document.getElementById('nextPageBtn').addEventListener('click', () => {
                 const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
                 if (currentPage < totalPages) {
                     currentPage++;
-                    renderProducts(filteredProducts); // Re-renderizar con la nueva página
+                    renderProducts(filteredProducts);
                 }
             });
 
-
-            // Listener para el descuento global en el panel del carrito
             document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
 
-            // Listener para abrir el modal de producto personalizado
+            // Listeners para el modal de producto personalizado
             openCustomProductModalBtn.addEventListener('click', openCustomProductModal);
-            // Listener para cerrar el modal de producto personalizado
             closeCustomProductModalBtn.addEventListener('click', closeCustomProductModal);
-             customProductModalOverlay.addEventListener('click', (e) => {
+            customProductModalOverlay.addEventListener('click', (e) => {
                  if (e.target.id === 'customProductModalOverlay') {
                      closeCustomProductModal();
                  }
              });
-            // Listener para agregar producto personalizado desde el modal
             addCustomProductToCartBtn.addEventListener('click', addCustomProductToCart);
 
+            // Listeners para el modal de calculadora de mezclas
+            openCalculatorModalBtn.addEventListener('click', openCalculatorModal);
+            closeCalculatorModalBtn.addEventListener('click', closeCalculatorModal);
+             calculatorModalOverlay.addEventListener('click', (e) => {
+                 if (e.target.id === 'calculatorModalOverlay') {
+                     closeCalculatorModal();
+                 }
+             });
+            calcularMezclaBtn.addEventListener('click', calcularMezcla);
 
-            // Listeners para abrir y cerrar el panel del carrito
+
             floatingCartBubble.addEventListener('click', openCartPanel);
             document.getElementById('closeCartPanel').addEventListener('click', closeCartPanel);
              cartPanelOverlay.addEventListener('click', (e) => {
-                // Cerrar si se hace clic fuera del panel
                 if (e.target.id === 'cartPanelOverlay') {
                     closeCartPanel();
                 }
             });
 
-            // Listener para el botón "Siguiente" en el panel del carrito
             document.getElementById('nextToFormBtn').addEventListener('click', goToFormStep);
-
-            // Listener para el botón "Volver al Carrito" en el formulario
             document.getElementById('backToCart').addEventListener('click', backToCartStep);
 
-            // Listeners para los botones de generar PDF y enviar por WhatsApp en el formulario
             document.getElementById('generatePdfBtn').addEventListener('click', generatePdf);
             document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsappQuote);
-
-             // Listener para el botón de limpiar carrito en el panel del carrito
             document.getElementById('clearCartPanelBtn').addEventListener('click', clearCart);
         }
 
         // Abrir panel del carrito
         function openCartPanel() {
             cartPanelOverlay.classList.remove('hidden');
-             cartPanelOverlay.classList.add('visible'); // Añadir clase para la transición de opacidad
-            // Pequeño retraso para permitir que el display: flex se aplique antes de la transición
+             cartPanelOverlay.classList.add('visible');
             setTimeout(() => {
                 cartPanel.classList.add('open');
             }, 10);
@@ -599,18 +655,16 @@
         // Cerrar panel del carrito
         function closeCartPanel() {
             cartPanel.classList.remove('open');
-            // Esperar a que termine la transición antes de ocultar el overlay
             cartPanel.addEventListener('transitionend', () => {
-                 cartPanelOverlay.classList.remove('visible'); // Remover clase de opacidad
-                 cartPanelOverlay.classList.add('hidden'); // Ocultar completamente después de la transición
-            }, { once: true }); // Ejecutar el listener solo una vez
+                 cartPanelOverlay.classList.remove('visible');
+                 cartPanelOverlay.classList.add('hidden');
+            }, { once: true });
         }
 
          // Abrir modal de producto personalizado
         function openCustomProductModal() {
              customProductModalOverlay.classList.remove('hidden');
              customProductModalOverlay.classList.add('visible');
-             // Limpiar inputs al abrir
              customProductDescriptionInput.value = '';
              customProductPriceInput.value = '';
         }
@@ -621,6 +675,26 @@
              customProductModalOverlay.classList.add('hidden');
         }
 
+        // Abrir modal de calculadora de mezclas
+        function openCalculatorModal() {
+             calculatorModalOverlay.classList.remove('hidden');
+             calculatorModalOverlay.classList.add('visible');
+             // Limpiar inputs del calculador al abrir
+             mezclaAreaInput.value = '';
+             mezclaRendimientoInput.value = '';
+             mezclaParteAInput.value = '4';
+             mezclaParteBInput.value = '1';
+             mezclaParteCInput.value = '0';
+             mezclaResultadoDiv.classList.add('hidden');
+             mezclaErrorDiv.classList.add('hidden');
+        }
+
+         // Cerrar modal de calculadora de mezclas
+        function closeCalculatorModal() {
+             calculatorModalOverlay.classList.remove('visible');
+             calculatorModalOverlay.classList.add('hidden');
+        }
+
 
         // Transición al paso del formulario
         function goToFormStep() {
@@ -628,11 +702,10 @@
                 showNotification('Agrega productos al carrito antes de continuar.', 'bg-yellow-500');
                 return;
             }
-            closeCartPanel(); // Cerrar el panel del carrito
-            step1.classList.remove('active'); // Ocultar paso 1
-            step2.classList.add('active'); // Mostrar paso 2
+            closeCartPanel();
+            step1.classList.remove('active');
+            step2.classList.add('active');
 
-             // Habilitar/deshabilitar botones de PDF y WhatsApp si hay items en el carrito
             const generatePdfBtn = document.getElementById('generatePdfBtn');
             const sendWhatsappBtn = document.getElementById('sendWhatsappBtn');
              if (cart.length > 0) {
@@ -646,12 +719,9 @@
 
         // Transición de vuelta al paso del carrito
         function backToCartStep() {
-            step2.classList.remove('active'); // Ocultar paso 2
-            step1.classList.add('active'); // Mostrar paso 1
-            // Opcional: abrir el panel del carrito de nuevo
-            // openCartPanel();
+            step2.classList.remove('active');
+            step1.classList.add('active');
         }
-
 
         // Aplicar filtros y ordenamiento
         function applyFilters() {
@@ -662,49 +732,41 @@
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
             const sortBy = document.getElementById('sortBy').value;
 
-            // Filtrar productos: deben coincidir con todas las palabras clave ingresadas y el rango de precio
             filteredProducts = products.filter(product => {
                 const description = (product.Descripcion || '').toLowerCase();
                 const price = parseFloat((product.PrecioPublico || '0').toString().replace(',', '.')) || 0;
 
-                // Verificar si la descripción incluye todas las palabras clave (si se ingresaron)
                 const matchesKeywords =
                     (!keyword1 || description.includes(keyword1)) &&
                     (!keyword2 || description.includes(keyword2)) &&
                     (!keyword3 || description.includes(keyword3));
 
-                // Verificar si el precio está dentro del rango
                 const matchesPrice = price >= minPrice && price <= maxPrice;
 
                 return matchesKeywords && matchesPrice;
             });
 
-            // Ordenar los productos filtrados
             sortProducts(filteredProducts, sortBy);
-
-            // Renderizar la página actual de productos filtrados
             renderProducts(filteredProducts);
         }
 
         // Ordenar productos
         function sortProducts(products, sortBy) {
-            const [field, order] = sortBy.split('-'); // Separar campo y orden (name/price - asc/desc)
+            const [field, order] = sortBy.split('-');
 
             products.sort((a, b) => {
                 if (field === 'name') {
-                    // Ordenar por Nombre (Descripcion) alfabéticamente
                     return order === 'asc'
                         ? (a.Descripcion || '').localeCompare(b.Descripcion || '')
                         : (b.Descripcion || '').localeCompare(a.Descripcion || '');
                 } else if (field === 'price') {
-                    // Ordenar por PrecioPublico numéricamente
                     const priceA = parseFloat((a.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                     const priceB = parseFloat((b.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                     return order === 'asc'
                         ? priceA - priceB
                         : priceB - priceA;
                 }
-                return 0; // No ordenar si el criterio no es válido
+                return 0;
             });
         }
 
@@ -717,49 +779,43 @@
             const nextPageBtn = document.getElementById('nextPageBtn');
 
 
-            container.innerHTML = ''; // Limpiar el contenedor actual de productos
+            container.innerHTML = '';
 
-            // Calcular productos para la página actual
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
             const productsOnPage = productsToRender.slice(startIndex, endIndex);
 
-             // Calcular el total de páginas
             const totalPages = Math.ceil(productsToRender.length / itemsPerPage);
 
-            // Actualizar información de paginación
             pageInfoElement.textContent = `Página ${totalPages > 0 ? currentPage : 0} de ${totalPages}`;
             prevPageBtn.disabled = currentPage === 1 || totalPages === 0;
             nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
 
 
-            // Mostrar mensaje si no hay productos para renderizar
             if (productsOnPage.length === 0) {
                 noProductsMessage.classList.remove('hidden');
-                 container.classList.add('grid-cols-1'); // Asegurar que el contenedor ocupe el ancho completo si no hay productos
-                 container.classList.remove('md:grid-cols-2', 'lg:grid-cols-3');
+                container.classList.add('grid-cols-1');
+                container.classList.remove('md:grid-cols-2', 'lg:grid-cols-3');
+                // Ocultar paginación si no hay productos
+                document.getElementById('pagination').classList.add('hidden');
                 return;
             }
 
-            noProductsMessage.classList.add('hidden'); // Ocultar mensaje si hay productos
-             container.classList.remove('grid-cols-1'); // Restaurar clases de grid si hay productos
-             container.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
+            noProductsMessage.classList.add('hidden');
+            container.classList.remove('grid-cols-1');
+            container.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
+             // Mostrar paginación si hay productos
+             document.getElementById('pagination').classList.remove('hidden');
 
 
-            // Iterar sobre los productos de la página actual y crear su tarjeta HTML
             productsOnPage.forEach(product => {
-                // Verificar si el producto ya está en el carrito usando la clave "Clave"
                 const isInCart = cart.some(item => item.Clave === product.Clave);
-                // Obtener la cantidad actual si está en el carrito
                 const currentQuantity = isInCart ? cart.find(item => item.Clave === product.Clave).quantity : 1;
 
-
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card bg-white border border-gray-200 rounded-lg overflow-hidden transition duration-300 ease-in-out flex flex-col'; // Usar flex para layout interno
-
-                // Manejar la coma decimal en el precio para mostrarlo correctamente
                 const displayPrice = parseFloat((product.PrecioPublico || '0').toString().replace(',', '.')) || 0;
 
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white border border-gray-200 rounded-lg overflow-hidden transition duration-300 ease-in-out flex flex-col';
 
                 productCard.innerHTML = `
                     <div class="p-4 flex-grow"> <div class="h-32 bg-gray-100 flex items-center justify-center mb-4 overflow-hidden rounded-md">
@@ -786,40 +842,32 @@
                     </div>
                 `;
 
-                container.appendChild(productCard); // Agregar la tarjeta al contenedor
+                container.appendChild(productCard);
             });
 
-            // Agregar event listeners a los botones de "Agregar al carrito" en la página actual
             document.querySelectorAll('#productsContainer .add-to-cart').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    // Obtener el ID del producto desde el atributo data-id (que es la Clave)
                     const productId = parseInt(e.target.getAttribute('data-id'));
-                    // Obtener la cantidad del input asociado a este botón
                     const quantityInput = e.target.closest('.flex.items-center').querySelector('.quantity-input');
-                    const quantity = parseInt(quantityInput.value) || 1; // Default a 1 si no es un número válido o está vacío
+                    const quantity = parseInt(quantityInput.value) || 1;
 
-                    // Deshabilitar el botón y cambiar texto inmediatamente al agregar
                     button.classList.remove('bg-tpsOrange', 'hover:bg-orange-600');
                     button.classList.add('bg-gray-400');
                     button.disabled = true;
                     button.innerHTML = '<i class="fas fa-check mr-1"></i> Agregado';
 
-                    addToCart(productId, quantity); // Llamar a la función para agregar al carrito con cantidad
+                    addToCart(productId, quantity);
                 });
             });
 
-             // Agregar event listeners a los inputs de cantidad en las tarjetas de producto en la página actual
              document.querySelectorAll('#productsContainer .quantity-input').forEach(input => {
                  input.addEventListener('change', (e) => {
-                     // Cuando cambia la cantidad en la tarjeta, si el producto ya está en el carrito, actualizarlo
                      const productId = parseInt(e.target.closest('.product-card').querySelector('.add-to-cart').getAttribute('data-id'));
                      const newQuantity = parseInt(e.target.value) || 1;
-                     // Solo actualizar si el producto ya está en el carrito
                      if (cart.some(item => item.Clave === productId)) {
                          updateCartItemQuantity(productId, newQuantity);
                      }
                  });
-                  // Asegurar que el valor del input refleje la cantidad actual en el carrito al renderizar
                  const productId = parseInt(input.closest('.product-card').querySelector('.add-to-cart').getAttribute('data-id'));
                  const cartItem = cart.find(item => item.Clave === productId);
                  if (cartItem) {
@@ -828,79 +876,115 @@
              });
         }
 
-        // Función para agregar un producto personalizado al carrito
         function addCustomProductToCart() {
             const description = customProductDescriptionInput.value.trim();
             const price = parseFloat(customProductPriceInput.value);
 
-            // Validar inputs
             if (description === '' || isNaN(price) || price < 0) {
                 showNotification('Por favor, ingresa una descripción y un precio válido para el producto personalizado.', 'bg-yellow-500');
                 return;
             }
 
-            // Generar una clave única temporal para el producto personalizado
             const customProductId = `custom-${Date.now()}-${customProductCounter++}`;
 
-            // Crear el objeto del producto personalizado
             const customProduct = {
                 Clave: customProductId,
                 Descripcion: description,
-                PrecioPublico: price, // Ya es un número por parseFloat
-                quantity: 1, // Cantidad inicial 1
-                isCustom: true // Marcar como producto personalizado
-                // No tiene otras propiedades como category, image, etc.
+                PrecioPublico: price,
+                quantity: 1,
+                isCustom: true
             };
 
-            // Agregar el producto personalizado al carrito
             cart.push(customProduct);
 
-            // Limpiar los campos del formulario y cerrar el modal
             customProductDescriptionInput.value = '';
             customProductPriceInput.value = '';
             closeCustomProductModal();
 
-            // Actualizar la interfaz del carrito
             updateCart();
             showNotification(`"${description}" agregado a la cotización.`, 'bg-green-600');
-            saveCart(); // Guardar cambios
+            saveCart();
+        }
+
+        function calcularMezcla() {
+            mezclaResultadoDiv.classList.add('hidden');
+            mezclaErrorDiv.classList.add('hidden');
+            mezclaErrorMessageP.textContent = '';
+
+            const area = parseFloat(mezclaAreaInput.value);
+            const rendimiento = parseFloat(mezclaRendimientoInput.value);
+            const parteA = parseFloat(mezclaParteAInput.value);
+            const parteB = parseFloat(mezclaParteBInput.value);
+            const parteC = parseFloat(mezclaParteCInput.value);
+
+            if (isNaN(area) || area <= 0) {
+                mostrarErrorMezcla("Por favor, ingresa un área válida (mayor a 0).");
+                return;
+            }
+             if (isNaN(rendimiento) || rendimiento <= 0) {
+                mostrarErrorMezcla("Por favor, ingresa un rendimiento válido por litro de mezcla (mayor a 0).");
+                return;
+            }
+            if (isNaN(parteA) || parteA < 0 || isNaN(parteB) || parteB < 0 || isNaN(parteC) || parteC < 0) {
+                 mostrarErrorMezcla("Por favor, ingresa valores válidos para la relación de mezcla (números mayores o iguales a 0).");
+                 return;
+            }
+             if (parteA === 0 && parteB === 0 && parteC === 0) {
+                 mostrarErrorMezcla("La relación de mezcla no puede ser 0:0:0.");
+                 return;
+             }
+
+            const totalMezclaNecesaria = area / rendimiento;
+            const partesTotales = parteA + parteB + parteC;
+            const volumenPorParte = totalMezclaNecesaria / partesTotales;
+
+            const volumenParteA = volumenPorParte * parteA;
+            const volumenParteB = volumenPorParte * parteB;
+            const volumenParteC = volumenPorParte * parteC;
+
+            mezclaTotalNecesariaP.textContent = `Volumen total de mezcla necesaria: ${totalMezclaNecesaria.toFixed(2)} Litros`;
+            mezclaResultadoParteAP.textContent = `Cantidad de Parte A (Pintura): ${volumenParteA.toFixed(2)} Litros`;
+            mezclaResultadoParteBP.textContent = `Cantidad de Parte B (Catalizador/Activador): ${volumenParteB.toFixed(2)} Litros`;
+
+            if (parteC > 0) {
+                mezclaResultadoParteCP.textContent = `Cantidad de Parte C (Reductor): ${volumenParteC.toFixed(2)} Litros`;
+                mezclaResultadoParteCP.classList.remove('hidden');
+            } else {
+                 mezclaResultadoParteCP.classList.add('hidden');
+            }
+
+            mezclaResultadoDiv.classList.remove('hidden');
+        }
+
+        function mostrarErrorMezcla(mensaje) {
+            mezclaErrorMessageP.textContent = mensaje;
+            mezclaErrorDiv.classList.remove('hidden');
         }
 
 
-        // Actualizar cantidad de un item en el carrito desde la tarjeta de producto o el panel
         function updateCartItemQuantity(productId, newQuantity) {
-             // Convertir productId a string si es un número para asegurar la comparación con claves personalizadas
              const idToFind = typeof productId === 'number' ? productId : productId.toString();
-
-             const existingItemIndex = cart.findIndex(item => item.Clave == idToFind); // Usar == para comparar number y string
+             const existingItemIndex = cart.findIndex(item => item.Clave == idToFind);
 
              if (existingItemIndex > -1) {
                  if (newQuantity > 0) {
                      cart[existingItemIndex].quantity = newQuantity;
                  } else {
-                     // Si la cantidad es 0 o menos, eliminar el item
                      cart.splice(existingItemIndex, 1);
                  }
-                 updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
-                 saveCart(); // Guardar cambios
+                 updateCart();
+                 saveCart();
 
-                 // Si la actualización vino del panel del carrito, re-renderizar la lista de productos
-                 // para actualizar el estado del botón "Agregado" si un item fue eliminado.
-                 // Si vino de la tarjeta, no re-renderizar para mantener el estado del input.
                  if (document.getElementById('cartPanelOverlay').classList.contains('visible')) {
-                      // Re-renderizar solo si el panel está abierto
                       renderProducts(filteredProducts);
                  } else {
-                     // Si la actualización fue desde la tarjeta, actualizar el input de cantidad en la tarjeta
-                     // Convertir productId a string para la selección del selector
                      const selectorId = typeof productId === 'number' ? productId : `'${productId}'`;
                      const inputInCard = document.querySelector(`#productsContainer .product-card [data-id="${selectorId}"]`);
 
                      if (inputInCard) {
                          const quantityInput = inputInCard.closest('.flex.items-center').querySelector('.quantity-input');
                          if (quantityInput) {
-                             quantityInput.value = newQuantity > 0 ? newQuantity : 1; // Resetear a 1 si se eliminó
-                             // Si se eliminó, habilitar el botón "Agregar"
+                             quantityInput.value = newQuantity > 0 ? newQuantity : 1;
                             if (newQuantity <= 0) {
                                 const addButton = inputInCard.closest('.product-card').querySelector('.add-to-cart');
                                 addButton.classList.remove('bg-gray-400');
@@ -915,15 +999,11 @@
         }
 
 
-        // Agregar producto al carrito con cantidad
-        function addToCart(productId, quantity = 1) { // Default quantity to 1
-             // Encontrar el producto por Clave (funciona para productos JSON y personalizados)
+        function addToCart(productId, quantity = 1) {
             const product = products.find(p => p.Clave === productId);
-            // Si no es un producto de la lista principal, podría ser un producto personalizado ya agregado
-            const existingCustomItem = cart.find(item => item.Clave === productId && item.isCustom); // Usar isCustom para identificar personalizados
+            const existingCustomItem = cart.find(item => item.Clave === productId && item.isCustom);
 
-
-            if (product) { // Es un producto de la lista principal
+            if (product) {
                 const existingItemIndex = cart.findIndex(item => item.Clave === productId);
                  if (existingItemIndex > -1) {
                      cart[existingItemIndex].quantity += quantity;
@@ -932,23 +1012,19 @@
                  }
                  showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización (${quantity} ${quantity > 1 ? 'unidades' : 'unidad'})`, 'bg-green-600');
 
-            } else if (existingCustomItem) { // Es un producto personalizado ya en el carrito
+            } else if (existingCustomItem) {
                  existingCustomItem.quantity += quantity;
                  showNotification(`${existingCustomItem.Descripcion || 'Producto Personalizado'} cantidad actualizada (${existingCustomItem.quantity} ${existingCustomItem.quantity > 1 ? 'unidades' : 'unidad'})`, 'bg-green-600');
             } else {
-                 // Esto no debería pasar si la lógica es correcta, pero lo manejamos
                  console.error("Intento de agregar un producto desconocido:", productId);
                  showNotification('Error al agregar el producto.', 'bg-red-600');
-                 return; // Salir si el producto no existe en ninguna parte
+                 return;
             }
 
-
-            updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
-            // renderProducts(filteredProducts); // No re-renderizar aquí para mantener el estado de los inputs de cantidad
-             saveCart(); // Guardar carrito en localStorage
+            updateCart();
+            saveCart();
         }
 
-        // Actualizar carrito (tanto el panel como la burbuja)
         function updateCart() {
             const cartItemsPanelContainer = document.getElementById('cartItemsPanel');
             const cartCountBubbleElement = document.getElementById('cartCountBubble');
@@ -961,53 +1037,39 @@
             const globalDiscountInput = document.getElementById('globalDiscountPanel');
             const globalDiscount = parseFloat(globalDiscountInput.value) || 0;
 
-
-            // Actualizar el contador de items en la burbuja del carrito
             const totalItems = cart.reduce((sum, item) => item.quantity > 0 ? sum + item.quantity : sum, 0);
             cartCountBubbleElement.textContent = totalItems;
-
-            // Habilitar/deshabilitar el botón "Siguiente" si hay items en el carrito
             nextToFormBtn.disabled = cart.length === 0 || totalItems === 0;
 
-
-             // Mostrar/ocultar la burbuja si el carrito está vacío
              if (totalItems > 0) {
                  floatingCartBubble.classList.remove('hidden');
              } else {
                  floatingCartBubble.classList.add('hidden');
              }
 
-
-            // Renderizar items del carrito en el panel
             if (cart.length === 0) {
-                // Mostrar mensaje si el carrito está vacío
                 cartItemsPanelContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>';
-                // Resetear totales
                 subtotalPanelElement.textContent = '$0.00';
                 discountAmountPanelElement.textContent = '-$0.00';
                 subtotalAfterDiscountPanelElement.textContent = '$0.00';
                 taxPanelElement.textContent = '$0.00';
                 totalPanelElement.textContent = '$0.00';
-                 saveCart(); // Guardar carrito vacío
+                 saveCart();
                 return;
             }
 
-            cartItemsPanelContainer.innerHTML = ''; // Limpiar el contenedor de items del carrito en el panel
+            cartItemsPanelContainer.innerHTML = '';
 
             let subtotal = 0;
 
-            // Iterar sobre los items del carrito y renderizarlos en el panel
             cart.forEach(item => {
-                // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
-                 // Manejar tanto números como strings con coma
                 const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                 const itemTotal = itemPrice * item.quantity;
-                subtotal += itemTotal; // Sumar al subtotal
+                subtotal += itemTotal;
 
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
 
-                 // Determinar la imagen a mostrar (logo si no hay otra)
                  const itemImage = item.image || companyInfo.logoUrl;
 
                 cartItem.innerHTML = `
@@ -1027,16 +1089,14 @@
                     </div>
                 `;
 
-                cartItemsPanelContainer.appendChild(cartItem); // Agregar el item al contenedor del carrito
+                cartItemsPanelContainer.appendChild(cartItem);
             });
 
-            // Calcular descuento, impuestos y total
             const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
-            const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
-            const total = subtotalAfterDiscount + tax; // Calcular total
+            const tax = subtotalAfterDiscount * 0.16;
+            const total = subtotalAfterDiscount + tax;
 
-            // Actualizar la interfaz de los totales en el panel
             subtotalPanelElement.textContent = `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             discountAmountPanelElement.textContent = `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             subtotalAfterDiscountPanelElement.textContent = `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1044,104 +1104,78 @@
             totalPanelElement.textContent = `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
 
-            // Agregar event listeners a los botones de eliminar item del carrito en el panel
             document.querySelectorAll('#cartItemsPanel .remove-item').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    // Obtener el ID (Clave) del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
-                    const productId = e.target.closest('button').getAttribute('data-id'); // Clave puede ser string o number
-                    removeFromCart(productId); // Llamar a la función para eliminar del carrito
+                    const productId = e.target.closest('button').getAttribute('data-id');
+                    removeFromCart(productId);
                 });
             });
 
-             // Agregar event listeners a los inputs de cantidad en el carrito
              document.querySelectorAll('.cart-quantity-input').forEach(input => {
                  input.addEventListener('change', (e) => {
-                     const productId = e.target.getAttribute('data-id'); // Clave puede ser string o number
-                     const newQuantity = parseInt(e.target.value) || 0; // Permitir 0 para eliminar
-                     updateCartItemQuantity(productId, newQuantity); // Reutilizar la función
+                     const productId = e.target.getAttribute('data-id');
+                     const newQuantity = parseInt(e.target.value) || 0;
+                     updateCartItemQuantity(productId, newQuantity);
                  });
              });
 
-
-             saveCart(); // Guardar carrito en localStorage
+             saveCart();
         }
 
-        // Eliminar producto del carrito
         function removeFromCart(productId) {
-             // Usamos la clave "Clave" para identificar el item a eliminar (funciona para string o number)
-            cart = cart.filter(item => item.Clave != productId); // Usar != para comparar string y number
-            updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
-            renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
-             saveCart(); // Guardar carrito en localStorage
+            cart = cart.filter(item => item.Clave != productId);
+            updateCart();
+            renderProducts(filteredProducts);
+            saveCart();
         }
 
-        // Limpiar carrito
         function clearCart() {
-            if (cart.length === 0) return; // No hacer nada si el carrito ya está vacío
+            if (cart.length === 0) return;
 
             if (confirm('¿Estás seguro de que deseas limpiar la cotización?')) {
-                cart = []; // Vaciar el array del carrito
-                updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
-                renderProducts(filteredProducts); // Volver a renderizar productos
-                showNotification('Cotización limpiada'); // Mostrar notificación
-                 saveCart(); // Guardar carrito vacío
+                cart = [];
+                updateCart();
+                renderProducts(filteredProducts);
+                showNotification('Cotización limpiada');
+                saveCart();
             }
         }
 
-        // Generar PDF
         function generatePdf() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Obtener datos del prospecto y vendedor
             const prospectName = document.getElementById('prospectName').value || 'N/A';
             const prospectCompany = document.getElementById('prospectCompany').value || 'N/A';
             const projectName = document.getElementById('projectName').value || 'N/A';
             const salespersonName = document.getElementById('salespersonName').value || 'N/A';
             const salespersonPhone = document.getElementById('salespersonPhone').value || 'N/A';
             const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A';
-            // Renombrar para evitar conflicto de declaración si existiera
-            const discountPercentage = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
+            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
 
-
-            // Encabezado del PDF (Información de la empresa y Logo)
             doc.setFontSize(20);
-            doc.setTextColor('#023047'); // tpsDarkBlue
+            doc.setTextColor('#023047');
             doc.text(companyInfo.name, 14, 20);
 
-            // Añadir Logo (asegúrate de que 'logotps.png' esté accesible)
             const img = new Image();
             img.onload = function() {
-                 // La imagen se ha cargado, ahora podemos añadirla al PDF
-                 // doc.addImage(img, format, x, y, width, height)
-                 // Ajusta las coordenadas (x, y) y el tamaño (width, height) según necesites
-                 doc.addImage(img, 'PNG', 150, 10, 50, 25); // Ejemplo: Posición derecha superior
-
-                 // Continuar generando el resto del PDF después de que el logo se carga
-                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage); // Pasar discountPercentage
-
-                 // Guardar PDF después de añadir todo el contenido
+                 doc.addImage(img, 'PNG', 150, 10, 50, 25);
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
                  doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
-
-                 showNotification('PDF generado con éxito'); // Mostrar notificación de éxito
-
+                 showNotification('PDF generado con éxito');
             };
             img.onerror = function() {
                  console.error("Error al cargar la imagen del logo.");
-                 // Si el logo falla, generar el PDF sin él
-                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage); // Pasar discountPercentage
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
                   doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
                  showNotification('PDF generado (sin logo debido a error de carga)');
             };
-            img.src = companyInfo.logoUrl; // Cargar la imagen del logo
-
+            img.src = companyInfo.logoUrl;
         }
 
-        // Función auxiliar para añadir el contenido principal del PDF (llamada después de cargar el logo)
-        function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage) { // Recibir discountPercentage
+        function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount) {
 
-            // Usar una fuente más agradable si está disponible (ej. Helvetica o Times)
-            doc.setFont('helvetica'); // Puedes probar con 'times' o 'courier' si helvetica no se ve bien
+            doc.setFont('helvetica');
 
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
@@ -1149,9 +1183,8 @@
             doc.text(`Teléfono: ${companyInfo.phone}`, 14, 30);
             doc.text(`Email: ${companyInfo.email}`, 14, 34);
 
-             // Información del Prospecto y Vendedor en el PDF
             doc.setFontSize(12);
-            doc.setTextColor('#023047'); // tpsDarkBlue
+            doc.setTextColor('#023047');
             doc.text('Datos del Prospecto:', 14, 45);
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(10);
@@ -1159,60 +1192,52 @@
             doc.text(`Empresa: ${prospectCompany}`, 14, 55);
             doc.text(`Proyecto: ${projectName}`, 14, 59);
             doc.text(`Vendedor: ${salespersonName}`, 14, 63);
-             doc.text(`Teléfono Vendedor: ${salespersonPhone}`, 14, 67);
-             doc.text(`Correo Vendedor: ${salespersonEmail}`, 14, 71);
-
+            doc.text(`Teléfono Vendedor: ${salespersonPhone}`, 14, 67);
+            doc.text(`Correo Vendedor: ${salespersonEmail}`, 14, 71);
 
             doc.setFontSize(16);
-            doc.setTextColor('#023047'); // tpsDarkBlue
-            doc.text('Detalle de la Cotización', 105, 85, { align: 'center' }); // Ajustar posición Y
+            doc.setTextColor('#023047');
+            doc.text('Detalle de la Cotización', 105, 85, { align: 'center' });
 
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 95); // Ajustar posición Y
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 95);
 
-
-            // Tabla de productos
             const tableData = cart.map(item => {
-                 // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
                  const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                  const itemTotal = itemPrice * item.quantity;
                  return [
-                    item.Descripcion || 'N/A', // Descripción del producto
-                    'N/A', // Presentación (no en tu JSON)
-                    'N/A', // Color (no en tu JSON)
-                    `$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Precio Unitario
+                    item.Descripcion || 'N/A',
+                    'N/A',
+                    'N/A',
+                    `$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
                     item.quantity,
-                    `$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Total por item
+                    `$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
                  ];
             });
 
-            // Calcular totales
             const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
-            const discountAmount = subtotal * (discountPercentage / 100); // Usar discountPercentage
+            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
+            const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
-            const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
-            const total = subtotalAfterDiscount + tax; // Calcular total
+            const tax = subtotalAfterDiscount * 0.16;
+            const total = subtotalAfterDiscount + tax;
 
-
-            // Agregar filas de totales - CORREGIDO para mostrar los valores correctamente
-            // Usamos colSpan para que los totales se alineen debajo de la columna "Total"
             tableData.push([
                 { content: 'Subtotal:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                 `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
-            if (discountPercentage > 0) { // Solo mostrar descuento si es mayor a 0
+            if (globalDiscount > 0) {
                  tableData.push([
-                     { content: `Descuento (${discountPercentage}%):`, colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
-                     { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
+                     { content: `Descuento (${globalDiscount}%):`, colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
+                     { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } }
                  ]);
                   tableData.push([
                      { content: 'Subtotal con Descuento:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                      `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
                  ]);
             }
-
 
             tableData.push([
                 { content: 'IVA (16%):', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
@@ -1221,56 +1246,50 @@
 
             tableData.push([
                 { content: 'Total:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
-                { content: `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { fontStyle: 'bold', textColor: [40, 53, 147] } } // Color azul oscuro para total
+                { content: `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { fontStyle: 'bold', textColor: [40, 53, 147] } }
             ]);
 
-
             doc.autoTable({
-                startY: 105, // Ajustar posición inicial de la tabla
-                head: [['Producto', 'Presentación', 'Color', 'Precio Unitario', 'Cantidad', 'Total']], // Encabezados de la tabla
-                body: tableData, // Datos de la tabla
+                startY: 105,
+                head: [['Producto', 'Presentación', 'Color', 'Precio Unitario', 'Cantidad', 'Total']],
+                body: tableData,
                 headStyles: {
-                    fillColor: [2, 48, 71], // tpsDarkBlue en RGB
-                    textColor: 255, // Blanco
-                    fontStyle: 'bold' // Estilo de fuente del encabezado
+                    fillColor: [2, 48, 71],
+                    textColor: 255,
+                    fontStyle: 'bold'
                 },
                 styles: {
-                    cellPadding: 3, // Espaciado interno de las celdas
-                    fontSize: 9, // Tamaño de fuente de las celdas
-                    valign: 'middle', // Alineación vertical del contenido de las celdas
-                    overflow: 'linebreak' // Permitir que el texto se divida en varias líneas
+                    cellPadding: 3,
+                    fontSize: 9,
+                    valign: 'middle',
+                    overflow: 'linebreak'
                 },
                  columnStyles: {
-                    // Estilos específicos para cada columna
-                    0: { cellWidth: 70 }, // Producto (ajustar ancho si es necesario)
-                    1: { cellWidth: 'auto' }, // Presentación (N/A)
-                    2: { cellWidth: 'auto' }, // Color (N/A)
-                    3: { cellWidth: 'auto', halign: 'right' }, // Precio Unitario
-                    4: { cellWidth: 20, halign: 'center' }, // Cantidad (ancho fijo)
-                    5: { cellWidth: 'auto', halign: 'right' } // Total
+                    0: { cellWidth: 70 },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 'auto', halign: 'right' },
+                    4: { cellWidth: 20, halign: 'center' },
+                    5: { cellWidth: 'auto', halign: 'right' }
                 },
                  didDrawPage: function(data) {
-                    // Pie de página
                     doc.setFontSize(10);
                     doc.setTextColor(100);
                     doc.text('Generado por TPS Recubrimientos', 105, doc.internal.pageSize.height - 10, { align: 'center' });
                 },
                  didParseCell: function(data) {
-                    // Alinear verticalmente el contenido de las celdas
                     data.cell.styles.valign = 'middle';
-                     // Asegurar que el texto largo en la primera columna se envuelva
                     if (data.column.index === 0) {
                          data.cell.styles.overflow = 'linebreak';
                     }
                 }
             });
 
-            // Añadir comentarios fijos después de la tabla - SIMPLIFICADO Y CORREGIDO SALTO DE LÍNEA
-            let finalY = doc.lastAutoTable.finalY || 105; // Obtener la posición final de la tabla, o un valor por defecto
+            let finalY = doc.lastAutoTable.finalY || 105;
 
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
-            finalY += 15; // Espacio después de la tabla
+            finalY += 15;
 
             const comments = [
                 "• Cotización válida por 30 días naturales.",
@@ -1278,19 +1297,18 @@
             ];
 
              comments.forEach(comment => {
-                const textLines = doc.splitTextToSize(comment, doc.internal.pageSize.width - 28); // Ancho máximo de la página - márgenes
+                const textLines = doc.splitTextToSize(comment, doc.internal.pageSize.width - 28);
                 textLines.forEach(line => {
-                     if (finalY + 7 > doc.internal.pageSize.height - 20) { // Verificar si la línea cabe
+                     if (finalY + 7 > doc.internal.pageSize.height - 20) {
                          doc.addPage();
-                         finalY = 20; // Reiniciar posición Y en la nueva página
+                         finalY = 20;
                      }
                      doc.text(line, 14, finalY);
-                     finalY += 7; // Espacio entre líneas
+                     finalY += 7;
                 });
-                 finalY += 3; // Espacio adicional entre comentarios (opcional)
+                 finalY += 3;
             });
 
-             // Añadir el comentario del vendedor
              const salespersonComment = `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
              const salespersonCommentLines = doc.splitTextToSize(salespersonComment, doc.internal.pageSize.width - 28);
              salespersonCommentLines.forEach(line => {
@@ -1303,29 +1321,24 @@
              });
         }
 
-        // Función para enviar cotización por WhatsApp
         function sendWhatsappQuote() {
              const prospectPhone = document.getElementById('prospectPhone').value;
              const prospectName = document.getElementById('prospectName').value || 'Prospecto';
              const salespersonName = document.getElementById('salespersonName').value || 'Vendedor';
 
-             // Validar si hay número de teléfono del prospecto
              if (!prospectPhone || prospectPhone.trim() === '' || prospectPhone === 'N/A') {
                  showNotification('Por favor, ingresa el número de teléfono del prospecto para enviar por WhatsApp.', 'bg-yellow-500');
                  return;
              }
 
-             // Construir el mensaje de WhatsApp
              let whatsappMessage = `¡Hola ${prospectName}!\n\nAquí tienes tu cotización de TPS Recubrimientos:\n\n`;
 
-             // Agregar detalles de los items del carrito
              cart.forEach(item => {
                  const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                  const itemTotal = itemPrice * item.quantity;
                  whatsappMessage += `- ${item.Descripcion || 'Producto sin nombre'} (x${item.quantity}): $${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}\n`;
              });
 
-             // Calcular y agregar totales
              const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
              const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
              const discountAmount = subtotal * (globalDiscount / 100);
@@ -1339,9 +1352,8 @@
                  whatsappMessage += `\nSubtotal con Descuento: $${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
              }
              whatsappMessage += `\nIVA (16%): $${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-             whatsappMessage += `\nTotal: *$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}*`; // Total en negritas
+             whatsappMessage += `\nTotal: *$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}*`;
 
-             // Agregar comentarios fijos simplificados
              whatsappMessage += `\n\nNotas Importantes:\n`;
              whatsappMessage += `• Cotización válida por 30 días naturales.\n`;
              whatsappMessage += `• Precios sujetos a cambio sin previo aviso por ajustes externos.\n`;
@@ -1349,26 +1361,17 @@
              const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A';
              whatsappMessage += `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
 
-
-             // Codificar el mensaje para la URL de WhatsApp
              const encodedMessage = encodeURIComponent(whatsappMessage);
-
-             // Limpiar el número de teléfono (eliminar espacios, guiones, paréntesis)
             const cleanedPhoneNumber = prospectPhone.replace(/[\s\-\(\)]/g, '');
-
-             // Construir la URL de WhatsApp (usando +52 por defecto si el número no incluye código de país)
-             const phoneNumberWithCountryCode = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber : `+52${cleanedPhoneNumber}`; // Añadir +52 si no tiene código de país
+             const phoneNumberWithCountryCode = cleanedPhoneNumber.startsWith('+') ? cleanedPhoneNumber : `+52${cleanedPhoneNumber}`;
 
              const whatsappUrl = `https://wa.me/${phoneNumberWithCountryCode}?text=${encodedMessage}`;
 
-             // Abrir la URL en una nueva pestaña
              window.open(whatsappUrl, '_blank');
 
              showNotification('Mensaje de WhatsApp listo para enviar.', 'bg-blue-500');
         }
 
-
-        // Mostrar notificación
         function showNotification(message, bgColorClass = 'bg-green-600') {
             const notification = document.createElement('div');
             notification.className = `fixed bottom-4 right-4 ${bgColorClass} text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in`;
@@ -1376,7 +1379,6 @@
                 <i class="fas fa-info-circle mr-2"></i> <span>${message}</span>
             `;
 
-             // Cambiar icono si es éxito
             if (bgColorClass === 'bg-green-600') {
                  notification.querySelector('i').className = 'fas fa-check-circle mr-2';
             } else if (bgColorClass === 'bg-yellow-500') {
@@ -1385,16 +1387,14 @@
                  notification.querySelector('i').className = 'fas fa-times-circle mr-2';
             }
 
+            document.body.appendChild(notification);
 
-            document.body.appendChild(notification); // Agregar la notificación al cuerpo del documento
-
-            // Ocultar y eliminar la notificación después de un tiempo
             setTimeout(() => {
                 notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
                 setTimeout(() => {
                     notification.remove();
                 }, 300);
-            }, 5000); // Mostrar durante 5 segundos
+            }, 5000);
         }
     </script>
 </body>
