@@ -1027,7 +1027,7 @@
 
         // --- Información de la Empresa ---
         doc.setFontSize(16);
-        doc.setTextColor(tpsDarkBlue); // Usando el color definido en Tailwind config
+        doc.setTextColor('#023047'); // Usando el color definido en Tailwind config
         doc.setFont('helvetica', 'bold');
         doc.text(companyInfo.name, margin, currentY);
         currentY += 8;
@@ -1048,7 +1048,7 @@
         // --- Datos del Prospecto y Vendedor (lado izquierdo) ---
         const prospectBoxY = currentY; // Guardar Y para la caja de vendedor
         doc.setFontSize(11);
-        doc.setTextColor(tpsDarkBlue);
+        doc.setTextColor('#023047');
         doc.setFont('helvetica', 'bold');
         doc.text('Cliente:', margin, currentY);
         currentY += 5;
@@ -1066,7 +1066,7 @@
         const sellerX = pageWidth / 2 + 5; // Empezar un poco después de la mitad
 
         doc.setFontSize(11);
-        doc.setTextColor(tpsDarkBlue);
+        doc.setTextColor('#023047');
         doc.setFont('helvetica', 'bold');
         doc.text('Vendedor:', sellerX, currentY);
         currentY += 5;
@@ -1085,7 +1085,7 @@
 
         // --- Título de la Tabla ---
         doc.setFontSize(14);
-        doc.setTextColor(tpsDarkBlue);
+        doc.setTextColor('#023047');
         doc.setFont('helvetica', 'bold');
         doc.text('Detalle de la Cotización', pageWidth / 2, currentY, { align: 'center' });
         currentY += 10;
