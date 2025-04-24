@@ -1100,7 +1100,8 @@
             const salespersonName = document.getElementById('salespersonName').value || 'N/A';
             const salespersonPhone = document.getElementById('salespersonPhone').value || 'N/A';
             const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A';
-            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
+            // Renombrar para evitar conflicto de declaración si existiera
+            const discountPercentage = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
 
 
             // Encabezado del PDF (Información de la empresa y Logo)
@@ -1117,7 +1118,7 @@
                  doc.addImage(img, 'PNG', 150, 10, 50, 25); // Ejemplo: Posición derecha superior
 
                  // Continuar generando el resto del PDF después de que el logo se carga
-                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage); // Pasar discountPercentage
 
                  // Guardar PDF después de añadir todo el contenido
                  doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
@@ -1128,7 +1129,7 @@
             img.onerror = function() {
                  console.error("Error al cargar la imagen del logo.");
                  // Si el logo falla, generar el PDF sin él
-                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount);
+                 addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage); // Pasar discountPercentage
                   doc.save(`Cotizacion_${prospectName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
                  showNotification('PDF generado (sin logo debido a error de carga)');
             };
@@ -1137,7 +1138,7 @@
         }
 
         // Función auxiliar para añadir el contenido principal del PDF (llamada después de cargar el logo)
-        function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount) {
+        function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, discountPercentage) { // Recibir discountPercentage
 
             // Usar una fuente más agradable si está disponible (ej. Helvetica o Times)
             doc.setFont('helvetica'); // Puedes probar con 'times' o 'courier' si helvetica no se ve bien
@@ -1188,8 +1189,7 @@
 
             // Calcular totales
             const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
-            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
-            const discountAmount = subtotal * (globalDiscount / 100);
+            const discountAmount = subtotal * (discountPercentage / 100); // Usar discountPercentage
             const subtotalAfterDiscount = subtotal - discountAmount;
             const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
             const total = subtotalAfterDiscount + tax; // Calcular total
@@ -1202,9 +1202,9 @@
                 `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
-            if (globalDiscount > 0) { // Solo mostrar descuento si es mayor a 0
+            if (discountPercentage > 0) { // Solo mostrar descuento si es mayor a 0
                  tableData.push([
-                     { content: `Descuento (${globalDiscount}%):`, colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
+                     { content: `Descuento (${discountPercentage}%):`, colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                      { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
                  ]);
                   tableData.push([
