@@ -703,7 +703,7 @@
           showNotification('Cantidad actualizada en el carrito.', 'bg-blue-500');
       } else {
           // Si no existe, búscalo en la lista de productos cargados
-          const productToAdd = products.find(p => p.Clave === productId);
+          const productToAdd = products.find(p => p.Clave == productId); // Cambiado a == para comparación flexible de tipo
           if (productToAdd) {
               cart.push({
                   ...productToAdd, // Copia todas las props del producto
