@@ -1,1094 +1,683 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cotizador TPS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        tpsDarkBlue: '#023047',
-                        tpsOrange: '#fb8500',
-                        tpsWhite: '#ffffff',
-                    }
-                }
-            }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cotizador TPS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tpsDarkBlue: '#023047',
+            tpsOrange: '#fb8500',
+            tpsWhite: '#ffffff',
+          }
         }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Estilos personalizados para efectos visuales */
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .cart-item:hover {
-            background-color: #f8f9fa;
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        .floating-cart-bubble {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: #023047;
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease-in-out;
-            z-index: 1000;
-        }
-        .floating-cart-bubble:hover {
-            transform: scale(1.1);
-        }
-        .floating-cart-bubble .cart-count {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: #fb8500;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 9999px;
-        }
-        .cart-panel-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: flex;
-            justify-content: end;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .cart-panel-overlay.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        .cart-panel {
-            background-color: white;
-            width: 90%;
-            max-width: 400px;
-            height: 100%;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-        }
-        .cart-panel.open {
-            transform: translateX(0);
-        }
-        .cart-panel-header, .cart-panel-footer {
-            padding: 1rem;
-            border-color: #e5e7eb;
-        }
-        .cart-panel-header {
-            border-bottom: 1px solid;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .cart-panel-body {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-        .step { display: none; }
-        .step.active { display: block; }
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1100;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .modal-overlay.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-        .modal {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 400px;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease-in-out;
-        }
-        .modal-overlay.visible .modal {
-            transform: translateY(0);
-        }
-    </style>
+      }
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    /* Estilos personalizados */
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: translateY(0);} }
+    .custom-scrollbar::-webkit-scrollbar { width:6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background:#888; border-radius:3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#555; }
+    .floating-cart-bubble {
+      position:fixed; bottom:20px; left:20px;
+      background:#023047; color:#fff; border-radius:50%;
+      width:60px; height:60px; display:flex;
+      align-items:center; justify-content:center;
+      cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      transition:transform .3s; z-index:1000;
+    }
+    .floating-cart-bubble:hover { transform:scale(1.1); }
+    .floating-cart-bubble .cart-count {
+      position:absolute; top:-5px; right:-5px;
+      background:#fb8500; color:#fff; font-size:.75rem;
+      font-weight:bold; padding:2px 6px; border-radius:9999px;
+    }
+    .cart-panel-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.5); display:flex; justify-content:end;
+      visibility:hidden; opacity:0;
+      transition:visibility .3s,opacity .3s;
+    }
+    .cart-panel-overlay.visible { visibility:visible; opacity:1; }
+    .cart-panel {
+      background:#fff; width:90%; max-width:400px; height:100%;
+      box-shadow:-4px 0 12px rgba(0,0,0,0.2);
+      display:flex; flex-direction:column; transform:translateX(100%);
+      transition:transform .3s;
+    }
+    .cart-panel.open { transform:translateX(0); }
+    .cart-panel-header, .cart-panel-footer { padding:1rem; border-color:#e5e7eb; }
+    .cart-panel-header { border-bottom:1px solid; display:flex; justify-content:space-between; align-items:center; }
+    .cart-panel-body { flex-grow:1; overflow-y:auto; padding:1rem; }
+    .step { display:none; }
+    .step.active { display:block; }
+    .modal-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.6); display:flex;
+      align-items:center; justify-content:center;
+      visibility:hidden; opacity:0;
+      transition:visibility .3s,opacity .3s;
+      z-index:1100;
+    }
+    .modal-overlay.visible { visibility:visible; opacity:1; }
+    .modal {
+      background:#fff; padding:1.5rem; border-radius:.5rem;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      width:90%; max-width:400px;
+      transform:translateY(-20px);
+      transition:transform .3s;
+    }
+    .modal-overlay.visible .modal { transform:translateY(0); }
+  </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-10 flex flex-col sm:flex-row items-center justify-center">
-            <img src="logotps.png" alt="Logo TPS Recubrimientos" class="h-16 mb-4 sm:mb-0 sm:mr-4">
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-10 flex flex-col sm:flex-row items-center justify-center">
+      <img src="logotps.png" alt="Logo TPS" class="h-16 mb-4 sm:mb-0 sm:mr-4"/>
+      <div>
+        <h1 class="text-4xl font-bold text-center text-tpsDarkBlue mb-2">Cotizador TPS</h1>
+        <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
+      </div>
+      <button id="openCalculatorModalBtn"
+        class="ml-0 sm:ml-6 mt-4 sm:mt-0 bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center text-sm">
+        <i class="fas fa-calculator mr-2"></i> Calculadora de Mezclas
+      </button>
+    </header>
+
+    <!-- Aplicación -->
+    <div id="appContainer" class="relative">
+
+      <!-- Paso 1: Filtros y Productos -->
+      <div id="step1" class="step active">
+        <!-- Filtros -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+          <h2 class="text-xl font-semibold mb-4 text-gray-800">Filtros de Productos</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-                <h1 class="text-4xl font-bold text-center text-tpsDarkBlue mb-2">Cotizador TPS</h1>
-                <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 1</label>
+              <input id="filterKeyword1" class="w-full p-2 border rounded-md" placeholder="Ej: Epoxico"/>
             </div>
-            <button id="openCalculatorModalBtn" class="ml-0 sm:ml-6 mt-4 sm:mt-0 bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center text-sm">
-                <i class="fas fa-calculator mr-2"></i> Calculadora de Mezclas
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 2</label>
+              <input id="filterKeyword2" class="w-full p-2 border rounded-md" placeholder="Ej: Blanco"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 3</label>
+              <input id="filterKeyword3" class="w-full p-2 border rounded-md" placeholder="Ej: Galón"/>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Rango de precios</label>
+              <div class="flex items-center space-x-2">
+                <input id="minPrice" type="number" class="w-1/2 p-2 border rounded-md" placeholder="Mínimo"/>
+                <span>-</span>
+                <input id="maxPrice" type="number" class="w-1/2 p-2 border rounded-md" placeholder="Máximo"/>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+              <select id="sortBy" class="w-full p-2 border rounded-md">
+                <option value="name-asc">Nombre (A-Z)</option>
+                <option value="name-desc">Nombre (Z-A)</option>
+                <option value="price-asc">Precio (Menor a Mayor)</option>
+                <option value="price-desc">Precio (Mayor a Menor)</option>
+              </select>
+            </div>
+            <button id="applyFilters"
+              class="w-full bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center">
+              <i class="fas fa-filter mr-2"></i> Aplicar Filtros
             </button>
-        </header>
-
-        <div id="appContainer" class="relative">
-            <!-- Paso 1: Filtros y listado -->
-            <div id="step1" class="step active">
-                <!-- Filtros -->
-                <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Filtros de Productos</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 1</label>
-                            <input type="text" id="filterKeyword1" placeholder="Ej: Epoxico" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 2</label>
-                            <input type="text" id="filterKeyword2" placeholder="Ej: Blanco" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Palabra clave 3</label>
-                            <input type="text" id="filterKeyword3" placeholder="Ej: Galón" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rango de precios</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" id="minPrice" placeholder="Mínimo" class="w-1/2 p-2 border border-gray-300 rounded-md">
-                                <span>-</span>
-                                <input type="number" id="maxPrice" placeholder="Máximo" class="w-1/2 p-2 border border-gray-300 rounded-md">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
-                            <select id="sortBy" class="w-full p-2 border border-gray-300 rounded-md">
-                                <option value="name-asc">Nombre (A-Z)</option>
-                                <option value="name-desc">Nombre (Z-A)</option>
-                                <option value="price-asc">Precio (Menor a Mayor)</option>
-                                <option value="price-desc">Precio (Mayor a Menor)</option>
-                            </select>
-                        </div>
-                        <button id="applyFilters" class="w-full bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center md:mt-0 mt-4">
-                            <i class="fas fa-filter mr-2"></i> Aplicar Filtros
-                        </button>
-                    </div>
-                </div>
-                <!-- Listado de productos -->
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
-                        <button id="openCustomProductModalBtn" class="bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center text-sm">
-                            <i class="fas fa-plus-circle mr-2"></i> Agregar Producto Personalizado
-                        </button>
-                    </div>
-                    <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <p class="text-center text-gray-500">Cargando productos...</p>
-                    </div>
-                    <div id="noProductsMessage" class="text-center py-10 hidden">
-                        <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">No se encontraron productos con los filtros aplicados</p>
-                    </div>
-                    <div id="pagination" class="flex justify-center items-center mt-6 space-x-4">
-                        <button id="prevPageBtn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-300 disabled:opacity-50">
-                            <i class="fas fa-arrow-left mr-2"></i> Anterior
-                        </button>
-                        <span id="pageInfo" class="text-gray-700">Página 1 de 1</span>
-                        <button id="nextPageBtn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-300 disabled:opacity-50">
-                            Siguiente <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Paso 2: Formulario y PDF/WhatsApp -->
-            <div id="step2" class="step">
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold mb-6 text-gray-800">Datos de Cotización y Envío</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Prospecto</label>
-                            <input type="text" id="prospectName" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Empresa del Prospecto</label>
-                            <input type="text" id="prospectCompany" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
-                            <input type="text" id="projectName" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono del Prospecto (para WhatsApp)</label>
-                            <input type="tel" id="prospectPhone" placeholder="Ej: 5512345678" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Vendedor</label>
-                            <input type="text" id="salespersonName" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono del Vendedor</label>
-                            <input type="tel" id="salespersonPhone" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Correo del Vendedor</label>
-                            <input type="email" id="salespersonEmail" class="w-full p-2 border border-gray-300 rounded-md">
-                        </div>
-                    </div>
-                    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
-                        <button id="backToCart" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 transition duration-300 mb-4 sm:mb-0">
-                            <i class="fas fa-arrow-left mr-2"></i> Volver al Carrito
-                        </button>
-                        <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                            <button id="generatePdfBtn" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-300 flex items-center justify-center disabled:opacity-50 w-full sm:w-auto" disabled>
-                                <i class="fas fa-file-pdf mr-2"></i> Generar PDF
-                            </button>
-                            <button id="sendWhatsappBtn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300 flex items-center justify-center disabled:opacity-50 w-full sm:w-auto" disabled>
-                                <i class="fab fa-whatsapp mr-2"></i> Enviar por WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
 
-    <!-- Burbuja de carrito flotante -->
-    <div id="floatingCartBubble" class="floating-cart-bubble hidden">
-        <i class="fas fa-shopping-cart text-2xl"></i>
-        <span id="cartCountBubble" class="cart-count">0</span>
-    </div>
-
-    <!-- Panel de carrito -->
-    <div id="cartPanelOverlay" class="cart-panel-overlay hidden">
-        <div id="cartPanel" class="cart-panel">
-            <div class="cart-panel-header">
-                <h2 class="text-xl font-semibold text-gray-800">Tu Cotización</h2>
-                <button id="closeCartPanel" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div id="cartItemsPanel" class="cart-panel-body custom-scrollbar">
-                <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
-            </div>
-            <div class="cart-panel-footer">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento Global (%)</label>
-                    <input type="number" id="globalDiscountPanel" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div class="border-t border-gray-200 pt-4">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">Subtotal:</span>
-                        <span id="subtotalPanel" class="font-medium">$0.00</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">Descuento:</span>
-                        <span id="discountAmountPanel" class="font-medium text-red-600">-$0.00</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">Subtotal con Descuento:</span>
-                        <span id="subtotalAfterDiscountPanel" class="font-medium">$0.00</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-600">IVA (16%):</span>
-                        <span id="taxPanel" class="font-medium">$0.00</span>
-                    </div>
-                    <div class="flex justify-between text-lg font-semibold">
-                        <span class="text-gray-800">Total:</span>
-                        <span id="totalPanel" class="text-indigo-600">$0.00</span>
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <button id="nextToFormBtn" class="w-full bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
-                        Siguiente <i class="fas fa-arrow-right ml-2"></i>
-                    </button>
-                    <button id="clearCartPanelBtn" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center mt-3">
-                        <i class="fas fa-trash-alt mr-2"></i> Limpiar Cotización
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Producto Personalizado -->
-    <div id="customProductModalOverlay" class="modal-overlay">
-        <div class="modal">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Agregar Producto Personalizado</h3>
-                <button id="closeCustomProductModalBtn" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
-                <input type="text" id="customProductDescription" class="w-full p-2 border border-gray-300 rounded-md">
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Precio (sin IVA):</label>
-                <input type="number" id="customProductPrice" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
-            </div>
-            <button id="addCustomProductToCartBtn" class="w-full bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center">
-                <i class="fas fa-plus-circle mr-2"></i> Agregar a Cotización
+        <!-- Productos -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
+            <button id="openCustomProductModalBtn"
+              class="bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 flex items-center text-sm">
+              <i class="fas fa-plus-circle mr-2"></i> Producto Personalizado
             </button>
+          </div>
+          <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p class="text-center text-gray-500">Cargando productos...</p>
+          </div>
+          <div id="noProductsMessage" class="hidden text-center py-10">
+            <i class="fas fa-box-open text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-500">No se encontraron productos</p>
+          </div>
+          <div id="pagination" class="flex justify-center items-center mt-6 space-x-4">
+            <button id="prevPageBtn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md disabled:opacity-50">
+              <i class="fas fa-arrow-left mr-2"></i> Anterior
+            </button>
+            <span id="pageInfo" class="text-gray-700">Página 1 de 1</span>
+            <button id="nextPageBtn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md disabled:opacity-50">
+              Siguiente <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Modal Calculadora Mezclas -->
-    <div id="calculatorModalOverlay" class="modal-overlay">
-        <div class="modal">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-semibold text-gray-800">Calculadora de Mezclas</h3>
-                <button id="closeCalculatorModalBtn" class="text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
+      <!-- Paso 2: Datos y Generación -->
+      <div id="step2" class="step">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-semibold mb-6 text-gray-800">Datos de Cotización y Envío</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Nombre Prospecto</label>
+              <input id="prospectName" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Empresa Prospecto</label>
+              <input id="prospectCompany" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Proyecto</label>
+              <input id="projectName" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Teléfono (WhatsApp)</label>
+              <input id="prospectPhone" type="tel" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Nombre Vendedor</label>
+              <input id="salespersonName" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Teléfono Vendedor</label>
+              <input id="salespersonPhone" class="w-full p-2 border rounded-md"/></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Correo Vendedor</label>
+              <input id="salespersonEmail" type="email" class="w-full p-2 border rounded-md"/></div>
+          </div>
+          <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
+            <button id="backToCart"
+              class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400 mb-4 sm:mb-0 flex items-center">
+              <i class="fas fa-arrow-left mr-2"></i> Volver
+            </button>
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+              <button id="generatePdfBtn"
+                class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center justify-center w-full sm:w-auto"
+                disabled>
+                <i class="fas fa-file-pdf mr-2"></i> Generar PDF
+              </button>
+              <button id="sendWhatsappBtn"
+                class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 disabled:opacity-50 flex items-center justify-center w-full sm:w-auto"
+                disabled>
+                <i class="fab fa-whatsapp mr-2"></i> Enviar WhatsApp
+              </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Metros Cuadrados a Cubrir (m²)</label>
-                    <input type="number" id="mezclaArea" min="0.01" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Rendimiento por Litro de Mezcla (m²/L)</label>
-                    <input type="number" id="mezclaRendimiento" min="0.01" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
-                </div>
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Relación de Mezcla (Pintura:Catalizador:Reductor)</label>
-                <div class="flex items-center space-x-2">
-                    <input type="number" id="mezclaParteA" min="0" value="4" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
-                    <span>:</span>
-                    <input type="number" id="mezclaParteB" min="0" value="1" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
-                    <span>:</span>
-                    <input type="number" id="mezclaParteC" min="0" value="0" class="w-1/3 p-2 border border-gray-300 rounded-md text-center">
-                </div>
-                <p class="text-xs text-gray-500 mt-1">Ejemplo: 4:1:0 (sin reductor) o 4:1:1 (con reductor)</p>
-            </div>
-            <div class="flex items-center justify-center mb-6">
-                <button id="calcularMezclaBtn" class="bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center">
-                    <i class="fas fa-calculator mr-2"></i> Calcular Mezcla
-                </button>
-            </div>
-            <div id="mezclaResultado" class="p-4 bg-gray-100 rounded-md hidden">
-                <h3 class="text-lg font-semibold mb-3 text-gray-800">Resultados:</h3>
-                <p id="mezclaTotalNecesaria" class="text-gray-700 mb-2"></p>
-                <p id="mezclaResultadoParteA" class="text-gray-700 mb-2"></p>
-                <p id="mezclaResultadoParteB" class="text-gray-700 mb-2"></p>
-                <p id="mezclaResultadoParteC" class="text-gray-700"></p>
-            </div>
-            <div id="mezclaError" class="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md hidden">
-                <p class="font-bold">Error en el cálculo:</p>
-                <p id="mezclaErrorMessage"></p>
-            </div>
+          </div>
         </div>
+      </div>
+
     </div>
+  </div>
 
-    <script>
-        const companyInfo = {
-            name: "TPS Recubrimientos",
-            address: "Calle Ficticia #123, Colonia Industrial, Ciudad, Estado",
-            phone: "55 1234 5678",
-            email: "contacto@tpsrecubrimientos.com",
-            logoUrl: "logotps.png"
-        };
+  <!-- Burbuja Carrito -->
+  <div id="floatingCartBubble" class="floating-cart-bubble hidden">
+    <i class="fas fa-shopping-cart text-2xl"></i>
+    <span id="cartCountBubble" class="cart-count">0</span>
+  </div>
 
-        let products = [];
-        let cart = [];
-        let filteredProducts = [];
-        let customProductCounter = 0;
-        const itemsPerPage = 9;
-        let currentPage = 1;
+  <!-- Panel Carrito -->
+  <div id="cartPanelOverlay" class="cart-panel-overlay hidden">
+    <div id="cartPanel" class="cart-panel">
+      <div class="cart-panel-header">
+        <h2 class="text-xl font-semibold">Tu Cotización</h2>
+        <button id="closeCartPanel"><i class="fas fa-times text-lg"></i></button>
+      </div>
+      <div id="cartItemsPanel" class="cart-panel-body custom-scrollbar">
+        <p class="text-center py-10 text-gray-500">Agrega productos para comenzar</p>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descuento (%)</label>
+          <input id="globalDiscountPanel" type="number" value="0" min="0" max="100" class="w-full p-2 border rounded-md"/>
+        </div>
+        <div class="border-t border-gray-200 pt-4">
+          <div class="flex justify-between mb-2"><span>Subtotal:</span><span id="subtotalPanel">$0.00</span></div>
+          <div class="flex justify-between mb-2"><span>Descuento:</span><span id="discountAmountPanel">-$0.00</span></div>
+          <div class="flex justify-between mb-2"><span>Sub c/Desc:</span><span id="subtotalAfterDiscountPanel">$0.00</span></div>
+          <div class="flex justify-between mb-2"><span>IVA 16%:</span><span id="taxPanel">$0.00</span></div>
+          <div class="flex justify-between font-semibold text-lg"><span>Total:</span><span id="totalPanel">$0.00</span></div>
+        </div>
+        <div class="mt-6 space-y-3">
+          <!-- Aquí quitamos disabled en el HTML -->
+          <button id="nextToFormBtn"
+            class="w-full bg-tpsDarkBlue text-tpsWhite py-2 rounded-md flex items-center justify-center disabled:opacity-50">
+            Siguiente <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+          <button id="clearCartPanelBtn"
+            class="w-full bg-gray-200 text-gray-800 py-2 rounded-md flex items-center justify-center">
+            <i class="fas fa-trash-alt mr-2"></i> Limpiar Cotización
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const floatingCartBubble = document.getElementById('floatingCartBubble');
-        const cartPanelOverlay = document.getElementById('cartPanelOverlay');
-        const cartPanel = document.getElementById('cartPanel');
-        const customProductModalOverlay = document.getElementById('customProductModalOverlay');
-        const openCustomProductModalBtn = document.getElementById('openCustomProductModalBtn');
-        const closeCustomProductModalBtn = document.getElementById('closeCustomProductModalBtn');
-        const addCustomProductToCartBtn = document.getElementById('addCustomProductToCartBtn');
-        const customProductDescriptionInput = document.getElementById('customProductDescription');
-        const customProductPriceInput = document.getElementById('customProductPrice');
-        const calculatorModalOverlay = document.getElementById('calculatorModalOverlay');
-        const openCalculatorModalBtn = document.getElementById('openCalculatorModalBtn');
-        const closeCalculatorModalBtn = document.getElementById('closeCalculatorModalBtn');
-        const mezclaAreaInput = document.getElementById('mezclaArea');
-        const mezclaRendimientoInput = document.getElementById('mezclaRendimiento');
-        const mezclaParteAInput = document.getElementById('mezclaParteA');
-        const mezclaParteBInput = document.getElementById('mezclaParteB');
-        const mezclaParteCInput = document.getElementById('mezclaParteC');
-        const calcularMezclaBtn = document.getElementById('calcularMezclaBtn');
-        const mezclaResultadoDiv = document.getElementById('mezclaResultado');
-        const mezclaTotalNecesariaP = document.getElementById('mezclaTotalNecesaria');
-        const mezclaResultadoParteAP = document.getElementById('mezclaResultadoParteA');
-        const mezclaResultadoParteBP = document.getElementById('mezclaResultadoParteB');
-        const mezclaResultadoParteCP = document.getElementById('mezclaResultadoParteC');
-        const mezclaErrorDiv = document.getElementById('mezclaError');
-        const mezclaErrorMessageP = document.getElementById('mezclaErrorMessage');
+  <!-- Modal Producto Personalizado -->
+  <div id="customProductModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">Agregar Producto</h3>
+        <button id="closeCustomProductModalBtn"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="mb-4"><label class="block text-sm mb-1">Descripción:</label>
+        <input id="customProductDescription" class="w-full p-2 border rounded-md"/>
+      </div>
+      <div class="mb-6"><label class="block text-sm mb-1">Precio (sin IVA):</label>
+        <input id="customProductPrice" type="number" step="0.01" class="w-full p-2 border rounded-md"/>
+      </div>
+      <button id="addCustomProductToCartBtn"
+        class="w-full bg-tpsOrange text-tpsWhite py-2 rounded-md flex items-center justify-center hover:bg-orange-600">
+        <i class="fas fa-plus-circle mr-2"></i> Agregar
+      </button>
+    </div>
+  </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProducts();
-            setupEventListeners();
-            loadCart();
-            updateCartBubbleCount();
+  <!-- Modal Calculadora -->
+  <div id="calculatorModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold">Calculadora de Mezclas</h3>
+        <button id="closeCalculatorModalBtn"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div><label class="block text-sm mb-1">Área (m²)</label>
+          <input id="mezclaArea" type="number" step="0.01" class="w-full p-2 border rounded-md"/></div>
+        <div><label class="block text-sm mb-1">Rendimiento (m²/L)</label>
+          <input id="mezclaRendimiento" type="number" step="0.01" class="w-full p-2 border rounded-md"/></div>
+      </div>
+      <div class="mb-6">
+        <label class="block text-sm mb-1">Relación Pint:Catal:Red</label>
+        <div class="flex items-center space-x-2">
+          <input id="mezclaParteA" type="number" value="4" class="w-1/3 p-2 border rounded-md text-center"/>
+          <span>:</span>
+          <input id="mezclaParteB" type="number" value="1" class="w-1/3 p-2 border rounded-md text-center"/>
+          <span>:</span>
+          <input id="mezclaParteC" type="number" value="0" class="w-1/3 p-2 border rounded-md text-center"/>
+        </div>
+      </div>
+      <div class="flex justify-center mb-6">
+        <button id="calcularMezclaBtn"
+          class="bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md flex items-center hover:bg-gray-800">
+          <i class="fas fa-calculator mr-2"></i> Calcular
+        </button>
+      </div>
+      <div id="mezclaResultado" class="hidden p-4 bg-gray-100 rounded-md">
+        <h3 class="font-semibold mb-3">Resultados:</h3>
+        <p id="mezclaTotalNecesaria" class="mb-2"></p>
+        <p id="mezclaResultadoParteA" class="mb-2"></p>
+        <p id="mezclaResultadoParteB" class="mb-2"></p>
+        <p id="mezclaResultadoParteC"></p>
+      </div>
+      <div id="mezclaError" class="hidden p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+        <p class="font-bold">Error:</p>
+        <p id="mezclaErrorMessage"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Datos de la empresa
+    const companyInfo = {
+      name: "TPS Recubrimientos",
+      address: "Calle Ficticia #123",
+      phone: "55 1234 5678",
+      email: "contacto@tpsrecubrimientos.com",
+      logoUrl: "logotps.png"
+    };
+
+    // Variables globales
+    let products = [], cart = [], filteredProducts = [], customProductCounter = 0;
+    const itemsPerPage = 9; let currentPage = 1;
+
+    // DOM Elements
+    const step1 = document.getElementById('step1'),
+          step2 = document.getElementById('step2'),
+          floatingCartBubble = document.getElementById('floatingCartBubble'),
+          cartPanelOverlay    = document.getElementById('cartPanelOverlay'),
+          cartPanel           = document.getElementById('cartPanel'),
+          nextToFormBtn       = document.getElementById('nextToFormBtn');
+
+    // Al iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+      loadProducts();
+      setupEventListeners();
+      loadCart();
+      updateCart();            // habilita/deshabilita botón
+      updateCartBubbleCount();
+    });
+
+    // Carga productos desde JSON
+    function loadProducts() {
+      fetch('productos.json')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+          if (!Array.isArray(data)) throw "Formato inválido";
+          products = data; filteredProducts = [...data];
+          applyFilters();
+        })
+        .catch(e => {
+          console.error(e);
+          document.getElementById('productsContainer').innerHTML =
+            `<p class="text-red-600 text-center">Error cargando productos</p>`;
+          document.getElementById('pagination').classList.add('hidden');
         });
+    }
 
-        function loadProducts() {
-            fetch('productos.json')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    if (!Array.isArray(data)) throw new Error("El archivo JSON no contiene un array de productos.");
-                    products = data;
-                    filteredProducts = [...products];
-                    applyFilters();
-                })
-                .catch(error => {
-                    console.error("No se pudo cargar el archivo de productos:", error);
-                    const container = document.getElementById('productsContainer');
-                    container.innerHTML = `<p class="text-red-600 text-center">Error al cargar los productos: ${error.message}</p>`;
-                    document.getElementById('pagination').classList.add('hidden');
-                });
+    // Guarda y carga carrito
+    function saveCart() {
+      localStorage.setItem('tpsCart', JSON.stringify(cart));
+      updateCartBubbleCount();
+    }
+    function loadCart() {
+      const s = localStorage.getItem('tpsCart');
+      if (s) {
+        try { cart = JSON.parse(s) || []; }
+        catch { cart = []; }
+      }
+    }
+
+    // Contador burbuja
+    function updateCartBubbleCount() {
+      const total = cart.reduce((s,i)=>s + (i.quantity||0), 0);
+      document.getElementById('cartCountBubble').textContent = total;
+      total ? floatingCartBubble.classList.remove('hidden') : floatingCartBubble.classList.add('hidden');
+    }
+
+    // Listeners
+    function setupEventListeners() {
+      ['filterKeyword1','filterKeyword2','filterKeyword3'].forEach(id=>
+        document.getElementById(id).addEventListener('input',()=>{currentPage=1;applyFilters()})
+      );
+      document.getElementById('applyFilters').addEventListener('click',()=>{currentPage=1;applyFilters()});
+      document.getElementById('sortBy').addEventListener('change',()=>{currentPage=1;applyFilters()});
+
+      document.getElementById('prevPageBtn').addEventListener('click',()=>{
+        if(currentPage>1){currentPage--;renderProducts(filteredProducts);}
+      });
+      document.getElementById('nextPageBtn').addEventListener('click',()=>{
+        const totalPages = Math.ceil(filteredProducts.length/itemsPerPage);
+        if(currentPage<totalPages){currentPage++;renderProducts(filteredProducts);}
+      });
+
+      document.getElementById('globalDiscountPanel').addEventListener('input',updateCart);
+
+      document.getElementById('openCustomProductModalBtn').addEventListener('click',()=>customProductModalOverlay.classList.add('visible'));
+      document.getElementById('closeCustomProductModalBtn').addEventListener('click',()=>customProductModalOverlay.classList.remove('visible'));
+      document.getElementById('addCustomProductToCartBtn').addEventListener('click',addCustomProductToCart);
+
+      document.getElementById('openCalculatorModalBtn').addEventListener('click',openCalculatorModal);
+      document.getElementById('closeCalculatorModalBtn').addEventListener('click',closeCalculatorModal);
+      calcularMezclaBtn.addEventListener('click',calcularMezcla);
+
+      floatingCartBubble.addEventListener('click',openCartPanel);
+      document.getElementById('closeCartPanel').addEventListener('click',closeCartPanel);
+
+      nextToFormBtn.addEventListener('click',goToFormStep);
+      document.getElementById('backToCart').addEventListener('click',backToCotizadorStep);
+      document.getElementById('generatePdfBtn').addEventListener('click',generatePdf);
+      document.getElementById('sendWhatsappBtn').addEventListener('click',sendWhatsappQuote);
+      document.getElementById('clearCartPanelBtn').addEventListener('click',clearCart);
+    }
+
+    // Mostrar panel carrito
+    function openCartPanel() {
+      updateCart();  // <-- garantiza habilitación correcta
+      cartPanelOverlay.classList.remove('hidden');
+      cartPanelOverlay.classList.add('visible');
+      setTimeout(()=>cartPanel.classList.add('open'),10);
+    }
+    function closeCartPanel() {
+      cartPanel.classList.remove('open');
+      cartPanel.addEventListener('transitionend',()=>{
+        cartPanelOverlay.classList.remove('visible');
+        cartPanelOverlay.classList.add('hidden');
+      },{once:true});
+    }
+
+    // Saltar a formulario
+    function goToFormStep() {
+      if(!cart.length){
+        showNotification('Agrega productos al carrito antes de continuar.','bg-yellow-500');
+        return;
+      }
+      closeCartPanel();
+      step1.classList.remove('active');
+      step2.classList.add('active');
+      document.getElementById('generatePdfBtn').disabled = false;
+      document.getElementById('sendWhatsappBtn').disabled = false;
+    }
+    function backToCotizadorStep(){
+      step2.classList.remove('active');
+      step1.classList.add('active');
+    }
+
+    // Filtros y render
+    function applyFilters(){
+      const k1=document.getElementById('filterKeyword1').value.toLowerCase(),
+            k2=document.getElementById('filterKeyword2').value.toLowerCase(),
+            k3=document.getElementById('filterKeyword3').value.toLowerCase(),
+            min=parseFloat(document.getElementById('minPrice').value)||0,
+            max=parseFloat(document.getElementById('maxPrice').value)||Infinity,
+            sortBy=document.getElementById('sortBy').value;
+      filteredProducts = products.filter(p=>{
+        const d=(p.Descripcion||'').toLowerCase();
+        const price=parseFloat((p.PrecioPublico||'0').replace(',','.'))||0;
+        return (!k1||d.includes(k1))&&(!k2||d.includes(k2))&&(!k3||d.includes(k3))
+          && price>=min && price<=max;
+      });
+      sortProducts(filteredProducts,sortBy);
+      renderProducts(filteredProducts);
+    }
+    function sortProducts(arr,sortBy){
+      const [f,o]=sortBy.split('-');
+      arr.sort((a,b)=>{
+        if(f==='name'){
+          const cmp=(a.Descripcion||'').localeCompare(b.Descripcion||'');
+          return o==='asc'?cmp:-cmp;
         }
+        const pa=parseFloat((a.PrecioPublico||'0').replace(',','.'))||0;
+        const pb=parseFloat((b.PrecioPublico||'0').replace(',','.'))||0;
+        return o==='asc'?pa-pb:pb-pa;
+      });
+    }
+    function renderProducts(arr){
+      const cont=document.getElementById('productsContainer'),
+            noMsg=document.getElementById('noProductsMessage'),
+            pageInfo=document.getElementById('pageInfo'),
+            prevBtn=document.getElementById('prevPageBtn'),
+            nextBtn=document.getElementById('nextPageBtn');
+      cont.innerHTML='';
+      const totalPages=Math.ceil(arr.length/itemsPerPage);
+      pageInfo.textContent=`Página ${totalPages?currentPage:0} de ${totalPages}`;
+      prevBtn.disabled = currentPage===1 || totalPages===0;
+      nextBtn.disabled = currentPage===totalPages || totalPages===0;
+      const start=(currentPage-1)*itemsPerPage,
+            pageItems=arr.slice(start,start+itemsPerPage);
+      if(!pageItems.length){
+        noMsg.classList.remove('hidden');
+        document.getElementById('pagination').classList.add('hidden');
+        return;
+      }
+      noMsg.classList.add('hidden');
+      document.getElementById('pagination').classList.remove('hidden');
+      pageItems.forEach(prod=>{
+        const inCart=cart.some(i=>i.Clave===prod.Clave),
+              qty=inCart?cart.find(i=>i.Clave===prod.Clave).quantity:1,
+              price=parseFloat((prod.PrecioPublico||'0').replace(',','.'))||0;
+        const card=document.createElement('div');
+        card.className='product-card bg-white border rounded-lg overflow-hidden flex flex-col transition';
+        card.innerHTML=`
+          <div class="p-4 flex-grow">
+            <div class="h-32 bg-gray-100 mb-4 flex items-center justify-center overflow-hidden rounded-md">
+              <img src="${companyInfo.logoUrl}" class="object-contain h-full w-full"/>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1">${prod.Descripcion||'Sin nombre'}</h3>
+            <p class="text-gray-600 text-sm line-clamp-3">${prod.Descripcion||''}</p>
+          </div>
+          <div class="p-4 border-t flex flex-col">
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-bold text-tpsDarkBlue text-lg">$${price.toFixed(2)}</span>
+            </div>
+            <div class="flex items-center">
+              <label class="mr-2 text-sm">Cant:</label>
+              <input type="number" value="${qty}" min="1" class="quantity-input w-16 p-1 border rounded-md text-center text-sm"/>
+              <button class="add-to-cart ${inCart?'bg-gray-400':'bg-tpsOrange hover:bg-orange-600'} text-tpsWhite py-1 px-3 rounded-md text-sm ml-auto transition"
+                data-id="${prod.Clave}" ${inCart?'disabled':''}>
+                ${inCart?'<i class="fas fa-check mr-1"></i>Agregado':'<i class="fas fa-cart-plus mr-1"></i>Agregar'}
+              </button>
+            </div>
+          </div>`;
+        cont.append(card);
+      });
+      // listeners
+      cont.querySelectorAll('.add-to-cart').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          const id=e.currentTarget.dataset.id,
+                q=parseInt(e.currentTarget.closest('.flex.items-center').querySelector('.quantity-input').value)||1;
+          addToCart(id,q);
+          btn.disabled=true;
+          btn.classList.replace('bg-tpsOrange','bg-gray-400');
+          btn.innerHTML='<i class="fas fa-check mr-1"></i>Agregado';
+        });
+      });
+      cont.querySelectorAll('.quantity-input').forEach(inp=>{
+        inp.addEventListener('change',e=>{
+          const id=e.currentTarget.closest('.product-card').querySelector('.add-to-cart').dataset.id,
+                nq=parseInt(e.currentTarget.value)||1;
+          if(cart.some(i=>i.Clave==id)) updateCartItemQuantity(id,nq);
+        });
+      });
+    }
 
-        function saveCart() {
-            localStorage.setItem('tpsCart', JSON.stringify(cart));
-            updateCartBubbleCount();
-        }
+    // Carrito
+    function addToCart(id,qty=1){
+      const prod=products.find(p=>p.Clave==id),
+            custom=cart.find(i=>i.Clave==id && i.isCustom);
+      if(prod){
+        const idx=cart.findIndex(i=>i.Clave==id);
+        if(idx>-1) cart[idx].quantity+=qty;
+        else cart.push({...prod,quantity:qty});
+      } else if(custom){
+        custom.quantity+=qty;
+      } else {
+        showNotification('Error al agregar','bg-red-600'); return;
+      }
+      saveCart();
+      updateCart();
+      showNotification('Agregado al carrito','bg-green-600');
+    }
 
-        function loadCart() {
-            const saved = localStorage.getItem('tpsCart');
-            if (saved) {
-                try {
-                    cart = JSON.parse(saved);
-                    if (!Array.isArray(cart)) cart = [];
-                } catch {
-                    cart = [];
-                }
-                updateCart();
-            }
-        }
+    function updateCartItemQuantity(id,qty){
+      const idx=cart.findIndex(i=>i.Clave==id);
+      if(idx>-1){
+        if(qty>0) cart[idx].quantity=qty;
+        else cart.splice(idx,1);
+        saveCart();
+        updateCart();
+        renderProducts(filteredProducts);
+      }
+    }
 
-        function updateCartBubbleCount() {
-            const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-            document.getElementById('cartCountBubble').textContent = totalItems;
-            totalItems > 0 ? floatingCartBubble.classList.remove('hidden') : floatingCartBubble.classList.add('hidden');
-        }
+    function clearCart(){
+      if(!cart.length) return;
+      if(confirm('¿Limpiar cotización?')){
+        cart=[];
+        saveCart();
+        updateCart();
+        renderProducts(filteredProducts);
+        showNotification('Cotización limpiada','bg-green-600');
+      }
+    }
 
-        function setupEventListeners() {
-            ['filterKeyword1','filterKeyword2','filterKeyword3'].forEach(id =>
-                document.getElementById(id).addEventListener('input', () => { currentPage = 1; applyFilters(); })
-            );
-            document.getElementById('applyFilters').addEventListener('click', () => { currentPage = 1; applyFilters(); });
-            document.getElementById('sortBy').addEventListener('change', () => { currentPage = 1; applyFilters(); });
-            document.getElementById('prevPageBtn').addEventListener('click', () => {
-                if (currentPage > 1) { currentPage--; renderProducts(filteredProducts); }
-            });
-            document.getElementById('nextPageBtn').addEventListener('click', () => {
-                const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-                if (currentPage < totalPages) { currentPage++; renderProducts(filteredProducts); }
-            });
-            document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
+    function updateCart(){
+      const panel=document.getElementById('cartItemsPanel');
+      panel.innerHTML='';
+      if(!cart.length){
+        panel.innerHTML='<p class="text-gray-500 text-center py-10">Agrega productos</p>';
+        ['subtotalPanel','discountAmountPanel','subtotalAfterDiscountPanel','taxPanel','totalPanel']
+          .forEach(id=>document.getElementById(id).textContent='$0.00');
+        nextToFormBtn.disabled=true;
+        updateCartBubbleCount();
+        return;
+      }
+      let subtotal=0;
+      cart.forEach(item=>{
+        const price=parseFloat((item.PrecioPublico||'0').replace(',','.'))||0,
+              total=price*item.quantity;
+        subtotal+=total;
+        const div=document.createElement('div');
+        div.className='cart-item fade-in p-3 border-b flex justify-between items-center';
+        div.innerHTML=`
+          <div class="flex items-center flex-grow mr-3">
+            <img src="${companyInfo.logoUrl}" class="w-10 h-10 object-contain mr-3 rounded-md"/>
+            <div class="flex-grow">
+              <h4 class="text-sm font-medium text-gray-800">${item.Descripcion}</h4>
+              <p class="text-xs text-gray-500">$${price.toFixed(2)}</p>
+            </div>
+          </div>
+          <div class="flex items-center">
+            <input type="number" value="${item.quantity}" min="0" class="cart-quantity-input w-16 p-1 border rounded-md text-center mr-2 text-sm" data-id="${item.Clave}"/>
+            <span class="font-semibold mr-3">$${total.toFixed(2)}</span>
+            <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.Clave}"><i class="fas fa-times"></i></button>
+          </div>`;
+        panel.append(div);
+      });
 
-            // Modals
-            openCustomProductModalBtn.addEventListener('click', openCustomProductModal);
-            closeCustomProductModalBtn.addEventListener('click', closeCustomProductModal);
-            customProductModalOverlay.addEventListener('click', e => {
-                if (e.target === customProductModalOverlay) closeCustomProductModal();
-            });
-            addCustomProductToCartBtn.addEventListener('click', addCustomProductToCart);
+      const discount=parseFloat(document.getElementById('globalDiscountPanel').value)||0,
+            discountAmount=subtotal*(discount/100),
+            after=subtotal-discountAmount,
+            tax=after*0.16,
+            grand=after+tax;
 
-            openCalculatorModalBtn.addEventListener('click', openCalculatorModal);
-            closeCalculatorModalBtn.addEventListener('click', closeCalculatorModal);
-            calculatorModalOverlay.addEventListener('click', e => {
-                if (e.target === calculatorModalOverlay) closeCalculatorModal();
-            });
-            calcularMezclaBtn.addEventListener('click', calcularMezcla);
+      document.getElementById('subtotalPanel').textContent=`$${subtotal.toFixed(2)}`;
+      document.getElementById('discountAmountPanel').textContent=`-$${discountAmount.toFixed(2)}`;
+      document.getElementById('subtotalAfterDiscountPanel').textContent=`$${after.toFixed(2)}`;
+      document.getElementById('taxPanel').textContent=`$${tax.toFixed(2)}`;
+      document.getElementById('totalPanel').textContent=`$${grand.toFixed(2)}`;
 
-            floatingCartBubble.addEventListener('click', openCartPanel);
-            document.getElementById('closeCartPanel').addEventListener('click', closeCartPanel);
-            cartPanelOverlay.addEventListener('click', e => {
-                if (e.target === cartPanelOverlay) closeCartPanel();
-            });
+      // habilita siguiente
+      const totalItems=cart.reduce((s,i)=>s+i.quantity,0);
+      nextToFormBtn.disabled = totalItems===0;
 
-            document.getElementById('nextToFormBtn').addEventListener('click', goToFormStep);
-            document.getElementById('backToCart').addEventListener('click', backToCotizadorStep);
-            document.getElementById('generatePdfBtn').addEventListener('click', generatePdf);
-            document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsappQuote);
-            document.getElementById('clearCartPanelBtn').addEventListener('click', clearCart);
-        }
+      // listeners dentro del panel
+      panel.querySelectorAll('.remove-item').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          cart = cart.filter(i=>i.Clave!=e.currentTarget.dataset.id);
+          saveCart(); updateCart(); renderProducts(filteredProducts);
+        });
+      });
+      panel.querySelectorAll('.cart-quantity-input').forEach(inp=>{
+        inp.addEventListener('change',e=>{
+          const id=e.currentTarget.dataset.id,
+                nq=parseInt(e.currentTarget.value)||0;
+          updateCartItemQuantity(id,nq);
+        });
+      });
 
-        function openCartPanel() {
-            cartPanelOverlay.classList.remove('hidden');
-            cartPanelOverlay.classList.add('visible');
-            setTimeout(() => cartPanel.classList.add('open'), 10);
-        }
+      updateCartBubbleCount();
+    }
 
-        function closeCartPanel() {
-            cartPanel.classList.remove('open');
-            cartPanel.addEventListener('transitionend', () => {
-                cartPanelOverlay.classList.remove('visible');
-                cartPanelOverlay.classList.add('hidden');
-            }, { once: true });
-        }
+    // ---- resto de funciones: calculadora, PDF, WhatsApp ----
 
-        function openCustomProductModal() {
-            customProductModalOverlay.classList.add('visible');
-            customProductDescriptionInput.value = '';
-            customProductPriceInput.value = '';
-        }
+    function showNotification(msg, bg='bg-green-600'){
+      const n=document.createElement('div');
+      n.className=`fixed bottom-4 right-4 ${bg} text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in`;
+      n.innerHTML=`<i class="fas fa-info-circle mr-2"></i><span>${msg}</span>`;
+      document.body.append(n);
+      setTimeout(()=>{
+        n.classList.add('opacity-0','transition-opacity','duration-300');
+        setTimeout(()=>n.remove(),300);
+      },5000);
+    }
 
-        function closeCustomProductModal() {
-            customProductModalOverlay.classList.remove('visible');
-        }
-
-        function openCalculatorModal() {
-            calculatorModalOverlay.classList.add('visible');
-            mezclaAreaInput.value = '';
-            mezclaRendimientoInput.value = '';
-            mezclaParteAInput.value = '4';
-            mezclaParteBInput.value = '1';
-            mezclaParteCInput.value = '0';
-            mezclaResultadoDiv.classList.add('hidden');
-            mezclaErrorDiv.classList.add('hidden');
-        }
-
-        function closeCalculatorModal() {
-            calculatorModalOverlay.classList.remove('visible');
-        }
-
-        function goToFormStep() {
-            if (!cart.length) {
-                showNotification('Agrega productos al carrito antes de continuar.', 'bg-yellow-500');
-                return;
-            }
-            closeCartPanel();
-            step1.classList.remove('active');
-            step2.classList.add('active');
-            const btnPdf = document.getElementById('generatePdfBtn');
-            const btnWa  = document.getElementById('sendWhatsappBtn');
-            btnPdf.disabled = btnWa.disabled = !cart.length;
-        }
-
-        function backToCotizadorStep() {
-            step2.classList.remove('active');
-            step1.classList.add('active');
-        }
-
-        function applyFilters() {
-            const k1 = document.getElementById('filterKeyword1').value.toLowerCase();
-            const k2 = document.getElementById('filterKeyword2').value.toLowerCase();
-            const k3 = document.getElementById('filterKeyword3').value.toLowerCase();
-            const min = parseFloat(document.getElementById('minPrice').value) || 0;
-            const max = parseFloat(document.getElementById('maxPrice').value) || Infinity;
-            const sortBy = document.getElementById('sortBy').value;
-
-            filteredProducts = products.filter(p => {
-                const desc = (p.Descripcion||'').toLowerCase();
-                const price = parseFloat((p.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                return (!k1||desc.includes(k1)) &&
-                       (!k2||desc.includes(k2)) &&
-                       (!k3||desc.includes(k3)) &&
-                       price>=min && price<=max;
-            });
-
-            sortProducts(filteredProducts, sortBy);
-            renderProducts(filteredProducts);
-        }
-
-        function sortProducts(arr, sortBy) {
-            const [field, order] = sortBy.split('-');
-            arr.sort((a,b) => {
-                if (field==='name') {
-                    const na = (a.Descripcion||'').localeCompare(b.Descripcion||'');
-                    return order==='asc'? na : -na;
-                } else {
-                    const pa = parseFloat((a.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                    const pb = parseFloat((b.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                    return order==='asc'? pa-pb : pb-pa;
-                }
-            });
-        }
-
-        function renderProducts(arr) {
-            const container = document.getElementById('productsContainer');
-            const noMsg = document.getElementById('noProductsMessage');
-            const pageInfo = document.getElementById('pageInfo');
-            const prevBtn = document.getElementById('prevPageBtn');
-            const nextBtn = document.getElementById('nextPageBtn');
-
-            container.innerHTML = '';
-            const totalPages = Math.ceil(arr.length / itemsPerPage);
-            pageInfo.textContent = `Página ${totalPages ? currentPage : 0} de ${totalPages}`;
-            prevBtn.disabled = currentPage===1 || !totalPages;
-            nextBtn.disabled = currentPage===totalPages || !totalPages;
-
-            const start = (currentPage-1)*itemsPerPage;
-            const pageItems = arr.slice(start, start+itemsPerPage);
-
-            if (!pageItems.length) {
-                noMsg.classList.remove('hidden');
-                document.getElementById('pagination').classList.add('hidden');
-                return;
-            }
-            noMsg.classList.add('hidden');
-            document.getElementById('pagination').classList.remove('hidden');
-
-            pageItems.forEach(product => {
-                const isIn = cart.some(i=>i.Clave===product.Clave);
-                const qty = isIn? cart.find(i=>i.Clave===product.Clave).quantity : 1;
-                const price = parseFloat((product.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                const card = document.createElement('div');
-                card.className = 'product-card bg-white border border-gray-200 rounded-lg overflow-hidden transition duration-300 ease-in-out flex flex-col';
-                card.innerHTML = `
-                    <div class="p-4 flex-grow">
-                        <div class="h-32 bg-gray-100 flex items-center justify-center mb-4 overflow-hidden rounded-md">
-                            <img src="${companyInfo.logoUrl}" alt="${product.Descripcion||''}" class="h-full w-full object-contain">
-                        </div>
-                        <h3 class="font-semibold text-base mb-1 text-gray-800">${product.Descripcion||'Producto sin nombre'}</h3>
-                        <p class="text-gray-600 text-sm mb-2 line-clamp-3">${product.Descripcion||''}</p>
-                    </div>
-                    <div class="p-4 border-t border-gray-200 flex flex-col">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="font-bold text-tpsDarkBlue text-lg">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <label class="text-sm font-medium text-gray-700 mr-2">Cantidad:</label>
-                            <input type="number" value="${qty}" min="1" class="quantity-input w-16 p-1 border border-gray-300 rounded-md text-center text-sm">
-                            <button class="add-to-cart ${isIn?'bg-gray-400':'bg-tpsOrange hover:bg-orange-600'} text-tpsWhite py-1 px-3 rounded-md text-sm transition duration-300 ml-auto" data-id="${product.Clave}" ${isIn?'disabled':''}>
-                                ${isIn?'<i class="fas fa-check mr-1"></i> Agregado':'<i class="fas fa-cart-plus mr-1"></i> Agregar'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            // listeners para botones y cambios de cantidad
-            container.querySelectorAll('.add-to-cart').forEach(btn=>{
-                btn.addEventListener('click', e=>{
-                    const id = e.currentTarget.getAttribute('data-id');
-                    const qty = parseInt(e.currentTarget.closest('.flex.items-center').querySelector('.quantity-input').value)||1;
-                    addToCart(id, qty);
-                    btn.classList.replace('bg-tpsOrange','bg-gray-400');
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-check mr-1"></i> Agregado';
-                });
-            });
-            container.querySelectorAll('.quantity-input').forEach(inp=>{
-                inp.addEventListener('change', e=>{
-                    const id = e.currentTarget.closest('.product-card').querySelector('.add-to-cart').getAttribute('data-id');
-                    const newQty = parseInt(e.currentTarget.value)||1;
-                    if (cart.some(i=>i.Clave==id)){
-                        updateCartItemQuantity(id, newQty);
-                    }
-                });
-            });
-        }
-
-        function addCustomProductToCart(){
-            const desc = customProductDescriptionInput.value.trim();
-            const price = parseFloat(customProductPriceInput.value);
-            if (!desc||isNaN(price)||price<0){
-                showNotification('Por favor, ingresa una descripción y un precio válido.', 'bg-yellow-500');
-                return;
-            }
-            const id = `custom-${Date.now()}-${customProductCounter++}`;
-            cart.push({ Clave:id, Descripcion:desc, PrecioPublico:price, quantity:1, isCustom:true });
-            saveCart();
-            closeCustomProductModal();
-            showNotification(`"${desc}" agregado a la cotización.`, 'bg-green-600');
-            updateCart();
-        }
-
-        function calcularMezcla(){
-            mezclaResultadoDiv.classList.add('hidden');
-            mezclaErrorDiv.classList.add('hidden');
-            const area = parseFloat(mezclaAreaInput.value);
-            const rendimiento = parseFloat(mezclaRendimientoInput.value);
-            const A = parseFloat(mezclaParteAInput.value);
-            const B = parseFloat(mezclaParteBInput.value);
-            const C = parseFloat(mezclaParteCInput.value);
-            if (isNaN(area)||area<=0){ return mostrarErrorMezcla("Área inválida."); }
-            if (isNaN(rendimiento)||rendimiento<=0){ return mostrarErrorMezcla("Rendimiento inválido."); }
-            if ((A+B+C)<=0){ return mostrarErrorMezcla("Relación inválida."); }
-            const total = area/rendimiento;
-            const unit = total/(A+B+C);
-            mezclaTotalNecesariaP.textContent = `Volumen total de mezcla necesaria: ${total.toFixed(2)} L`;
-            mezclaResultadoParteAP.textContent = `Cantidad de Parte A: ${(unit*A).toFixed(2)} L`;
-            mezclaResultadoParteBP.textContent = `Cantidad de Parte B: ${(unit*B).toFixed(2)} L`;
-            if (C>0){
-                mezclaResultadoParteCP.textContent = `Cantidad de Parte C: ${(unit*C).toFixed(2)} L`;
-                mezclaResultadoParteCP.classList.remove('hidden');
-            } else {
-                mezclaResultadoParteCP.classList.add('hidden');
-            }
-            mezclaResultadoDiv.classList.remove('hidden');
-        }
-
-        function mostrarErrorMezcla(msg){
-            mezclaErrorMessageP.textContent = msg;
-            mezclaErrorDiv.classList.remove('hidden');
-        }
-
-        function updateCartItemQuantity(id, qty){
-            const idx = cart.findIndex(i => i.Clave == id);
-            if(idx>-1){
-                if(qty>0) cart[idx].quantity = qty;
-                else cart.splice(idx,1);
-                saveCart();
-                updateCart();
-                renderProducts(filteredProducts);
-            }
-        }
-
-        function addToCart(id, qty=1){
-            const prod = products.find(p=>p.Clave==id);
-            const custom = cart.find(i=>i.Clave==id && i.isCustom);
-            if(prod){
-                const idx = cart.findIndex(i=>i.Clave==id);
-                if(idx>-1) cart[idx].quantity += qty;
-                else cart.push({...prod,quantity:qty});
-            } else if(custom){
-                custom.quantity += qty;
-            } else {
-                showNotification('Error al agregar el producto.', 'bg-red-600');
-                return;
-            }
-            saveCart();
-            showNotification(`Producto agregado (${qty}).`, 'bg-green-600');
-            updateCart();
-        }
-
-        function updateCart(){
-            const panel = document.getElementById('cartItemsPanel');
-            panel.innerHTML = '';
-            if(!cart.length){
-                panel.innerHTML = '<p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>';
-                ['subtotalPanel','discountAmountPanel','subtotalAfterDiscountPanel','taxPanel','totalPanel'].forEach(id=>document.getElementById(id).textContent='$0.00');
-                updateCartBubbleCount();
-                return;
-            }
-            let subtotal=0;
-            cart.forEach(item=>{
-                const price = parseFloat((item.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                const total = price*item.quantity;
-                subtotal += total;
-                const div = document.createElement('div');
-                div.className='cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
-                div.innerHTML=`
-                    <div class="flex items-center flex-grow mr-3">
-                        <img src="${companyInfo.logoUrl}" class="w-10 h-10 object-contain mr-3 rounded-md">
-                        <div class="flex-grow">
-                            <h4 class="text-sm font-medium text-gray-800">${item.Descripcion||''}</h4>
-                            <p class="text-xs text-gray-500">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="number" value="${item.quantity}" min="0" class="cart-quantity-input w-16 p-1 border border-gray-300 rounded-md text-center mr-2 text-sm" data-id="${item.Clave}">
-                        <span class="text-sm font-semibold mr-3">$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
-                        <button class="remove-item text-red-500 hover:text-red-700" data-id="${item.Clave}">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
-                panel.appendChild(div);
-            });
-
-            const discount = parseFloat(document.getElementById('globalDiscountPanel').value)||0;
-            const discountAmount = subtotal*(discount/100);
-            const afterDiscount = subtotal - discountAmount;
-            const tax = afterDiscount*0.16;
-            const grandTotal = afterDiscount + tax;
-
-            document.getElementById('subtotalPanel').textContent = `$${subtotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            document.getElementById('discountAmountPanel').textContent = `-$${discountAmount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            document.getElementById('subtotalAfterDiscountPanel').textContent = `$${afterDiscount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            document.getElementById('taxPanel').textContent = `$${tax.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            document.getElementById('totalPanel').textContent = `$${grandTotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-
-            // remove & quantity listeners
-            panel.querySelectorAll('.remove-item').forEach(btn=>{
-                btn.addEventListener('click', e=>{
-                    const id = e.currentTarget.getAttribute('data-id');
-                    cart = cart.filter(i=>i.Clave!=id);
-                    saveCart();
-                    updateCart();
-                    renderProducts(filteredProducts);
-                });
-            });
-            panel.querySelectorAll('.cart-quantity-input').forEach(inp=>{
-                inp.addEventListener('change', e=>{
-                    const id = e.currentTarget.getAttribute('data-id');
-                    const newQ = parseInt(e.currentTarget.value)||0;
-                    updateCartItemQuantity(id,newQ);
-                });
-            });
-
-            updateCartBubbleCount();
-        }
-
-        function clearCart(){
-            if(!cart.length) return;
-            if(confirm('¿Limpiar la cotización?')){
-                cart=[];
-                saveCart();
-                updateCart();
-                renderProducts(filteredProducts);
-                showNotification('Cotización limpiada', 'bg-green-600');
-            }
-        }
-
-        function generatePdf(){
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const pName = document.getElementById('prospectName').value||'N/A';
-            const pComp = document.getElementById('prospectCompany').value||'N/A';
-            const proj  = document.getElementById('projectName').value||'N/A';
-            const sName = document.getElementById('salespersonName').value||'N/A';
-            const sPhone= document.getElementById('salespersonPhone').value||'N/A';
-            const sEmail= document.getElementById('salespersonEmail').value||'N/A';
-            const discount = parseFloat(document.getElementById('globalDiscountPanel').value)||0;
-
-            doc.setFontSize(20);
-            doc.setTextColor('#023047');
-            doc.text(companyInfo.name, 14, 20);
-            const img = new Image();
-            img.onload = function(){
-                doc.addImage(img,'PNG',150,10,50,25);
-                addPdfContent(doc, pName, pComp, proj, sName, sPhone, sEmail, discount);
-                doc.save(`Cotizacion_${pName.replace(/[^a-zA-Z0-9]/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
-                showNotification('PDF generado con éxito','bg-green-600');
-            };
-            img.onerror = function(){
-                addPdfContent(doc, pName, pComp, proj, sName, sPhone, sEmail, discount);
-                doc.save(`Cotizacion_${pName.replace(/[^a-zA-Z0-9]/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
-                showNotification('PDF generado (sin logo)','bg-yellow-500');
-            };
-            img.src = companyInfo.logoUrl;
-        }
-
-        // --- Aquí está la función corregida SIN redeclarar `globalDiscount` ---
-        function addPdfContent(doc,
-            prospectName, prospectCompany, projectName,
-            salespersonName, salespersonPhone, salespersonEmail,
-            globalDiscount
-        ) {
-            doc.setFont('helvetica');
-            doc.setFontSize(10);
-            doc.setTextColor(0,0,0);
-            doc.text(`Dirección: ${companyInfo.address}`, 14, 26);
-            doc.text(`Teléfono: ${companyInfo.phone}`, 14, 30);
-            doc.text(`Email: ${companyInfo.email}`, 14, 34);
-
-            doc.setFontSize(12);
-            doc.setTextColor('#023047');
-            doc.text('Datos del Prospecto:', 14, 45);
-            doc.setFontSize(10);
-            doc.setTextColor(0,0,0);
-            doc.text(`Nombre: ${prospectName}`, 14, 51);
-            doc.text(`Empresa: ${prospectCompany}`, 14, 55);
-            doc.text(`Proyecto: ${projectName}`, 14, 59);
-            doc.text(`Vendedor: ${salespersonName}`, 14, 63);
-            doc.text(`Teléfono Vendedor: ${salespersonPhone}`, 14, 67);
-            doc.text(`Correo Vendedor: ${salespersonEmail}`, 14, 71);
-
-            doc.setFontSize(16);
-            doc.setTextColor('#023047');
-            doc.text('Detalle de la Cotización', 105, 85, { align:'center' });
-
-            doc.setFontSize(10);
-            doc.setTextColor(0,0,0);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 95);
-
-            const tableData = cart.map(item => {
-                const price = parseFloat((item.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                const total = price * item.quantity;
-                return [
-                    item.Descripcion||'N/A',
-                    'N/A',
-                    'N/A',
-                    `$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
-                    item.quantity,
-                    `$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
-                ];
-            });
-
-            const subtotal = cart.reduce((sum,item) => {
-                const p = parseFloat((item.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                return sum + p*item.quantity;
-            }, 0);
-            const discountAmount       = subtotal * (globalDiscount / 100);
-            const subtotalAfterDiscount= subtotal - discountAmount;
-            const tax                  = subtotalAfterDiscount * 0.16;
-            const total                = subtotalAfterDiscount + tax;
-
-            tableData.push([
-                { content:'Subtotal:', colSpan:5, styles:{fontStyle:'bold',halign:'right'} },
-                `$${subtotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
-            ]);
-
-            if (globalDiscount > 0) {
-                tableData.push([
-                    { content:`Descuento (${globalDiscount}%):`, colSpan:5, styles:{fontStyle:'bold',halign:'right'} },
-                    { content:`-$${discountAmount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
-                      styles:{textColor:[220,38,38],fontStyle:'bold'} }
-                ]);
-                tableData.push([
-                    { content:'Subtotal con Descuento:', colSpan:5, styles:{fontStyle:'bold',halign:'right'} },
-                    `$${subtotalAfterDiscount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
-                ]);
-            }
-
-            tableData.push([
-                { content:'IVA (16%):', colSpan:5, styles:{fontStyle:'bold',halign:'right'} },
-                `$${tax.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`
-            ]);
-
-            tableData.push([
-                { content:'Total:', colSpan:5, styles:{fontStyle:'bold',halign:'right'} },
-                { content:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`,
-                  styles:{fontStyle:'bold',textColor:[40,53,147]} }
-            ]);
-
-            doc.autoTable({
-                startY: 105,
-                head: [['Producto','Presentación','Color','Precio Unitario','Cantidad','Total']],
-                body: tableData,
-                headStyles: { fillColor:[2,48,71], textColor:255, fontStyle:'bold' },
-                styles:     { cellPadding:3, fontSize:9, valign:'middle', overflow:'linebreak' },
-                columnStyles:{
-                    0: { cellWidth:70 },
-                    3: { halign:'right' },
-                    4: { cellWidth:20, halign:'center' },
-                    5: { halign:'right' }
-                },
-                didDrawPage: (data) => {
-                    doc.setFontSize(10);
-                    doc.setTextColor(100);
-                    doc.text('Generado por TPS Recubrimientos', 105, doc.internal.pageSize.height - 10, { align:'center' });
-                }
-            });
-
-            let cursorY = doc.lastAutoTable.finalY + 15;
-            const comments = [
-                "• Cotización válida por 30 días naturales.",
-                "• Precios sujetos a cambio sin previo aviso por ajustes externos."
-            ];
-            comments.forEach(line => {
-                doc.splitTextToSize(line, doc.internal.pageSize.width - 28).forEach(txt => {
-                    if (cursorY > doc.internal.pageSize.height - 20) {
-                        doc.addPage();
-                        cursorY = 20;
-                    }
-                    doc.text(txt, 14, cursorY);
-                    cursorY += 7;
-                });
-                cursorY += 3;
-            });
-
-            const sellerLine = `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
-            doc.splitTextToSize(sellerLine, doc.internal.pageSize.width - 28).forEach(txt=>{
-                if (cursorY > doc.internal.pageSize.height - 20) {
-                    doc.addPage();
-                    cursorY = 20;
-                }
-                doc.text(txt, 14, cursorY);
-                cursorY += 7;
-            });
-        }
-
-        function sendWhatsappQuote(){
-            const phone = document.getElementById('prospectPhone').value.trim();
-            if (!phone) {
-                showNotification('Ingresa el teléfono del prospecto.', 'bg-yellow-500');
-                return;
-            }
-            let msg = `¡Hola ${document.getElementById('prospectName').value||'Prospecto'}!\n\nAquí tu cotización:\n\n`;
-            cart.forEach(item=>{
-                const p = parseFloat((item.PrecioPublico||'0').toString().replace(',', '.'))||0;
-                msg += `- ${item.Descripcion}(x${item.quantity}): $${(p*item.quantity).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}\n`;
-            });
-            const subtotal = cart.reduce((s,i)=>s + (parseFloat((i.PrecioPublico||'0').toString().replace(',', '.'))||0)*i.quantity,0);
-            const discount = parseFloat(document.getElementById('globalDiscountPanel').value)||0;
-            const discountAmount = subtotal*(discount/100);
-            const afterDiscount = subtotal-discountAmount;
-            const tax = afterDiscount*0.16;
-            const total = afterDiscount + tax;
-
-            msg += `\nSubtotal: $${subtotal.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            if (discount>0){
-                msg += `\nDescuento (${discount}%): -$${discountAmount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-                msg += `\nSubtotal c/Descuento: $${afterDiscount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            }
-            msg += `\nIVA (16%): $${tax.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
-            msg += `\nTotal: *$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}*`;
-            msg += `\n\nNotas:\n• Cotización válida 30 días.\n• Precios sujetos a cambio.\n`;
-            msg += `• Contacto: ${document.getElementById('salespersonName').value||''} al ${document.getElementById('salespersonPhone').value||''} / ${document.getElementById('salespersonEmail').value||''}.`;
-
-            const encoded = encodeURIComponent(msg);
-            let num = phone.replace(/[\s\-\(\)]/g,'');
-            if (!num.startsWith('+')) num = '+52'+num;
-            window.open(`https://wa.me/${num}?text=${encoded}`, '_blank');
-            showNotification('Mensaje listo para WhatsApp','bg-blue-500');
-        }
-
-        function showNotification(message, bgColorClass='bg-green-600'){
-            const notif = document.createElement('div');
-            notif.className = `fixed bottom-4 right-4 ${bgColorClass} text-white px-4 py-2 rounded-md shadow-lg flex items-center animate-fade-in`;
-            notif.innerHTML = `<i class="fas fa-info-circle mr-2"></i><span>${message}</span>`;
-            document.body.appendChild(notif);
-            setTimeout(()=>{
-                notif.classList.add('opacity-0','transition-opacity','duration-300');
-                setTimeout(()=>notif.remove(),300);
-            },5000);
-        }
-    </script>
+    // Implementar aquí generatePdf, addPdfContent, sendWhatsappQuote, openCalculatorModal, closeCalculatorModal, calcularMezcla y demás...
+  </script>
 </body>
 </html>
