@@ -455,11 +455,16 @@
                 .then(response => {
                     // Verificar si la respuesta es correcta (código 200-299)
                     if (!response.ok) {
-                        throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
+                        // Si hay un error de red o archivo no encontrado
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json(); // Parsea la respuesta como JSON
                 })
                 .then(data => {
+                    // Verificar si data es un array
+                    if (!Array.isArray(data)) {
+                        throw new Error("El archivo JSON no contiene un array de productos.");
+                    }
                     // Asigna los datos cargados a las variables products y filteredProducts
                     products = data;
                     filteredProducts = [...products];
@@ -468,7 +473,7 @@
                 .catch(error => {
                     console.error("No se pudo cargar el archivo de productos:", error);
                     // Mostrar un mensaje de error en la interfaz si la carga falla
-                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "productos.json" esté en la misma carpeta y tenga el formato JSON correcto.</p>';
+                    document.getElementById('productsContainer').innerHTML = `<p class="text-red-600 text-center">Error al cargar los productos: ${error.message}. Asegúrate de que "productos.json" esté en la misma carpeta y tenga el formato JSON correcto (un array de objetos).</p>`;
                 });
         }
 
@@ -483,7 +488,16 @@
         function loadCart() {
             const savedCart = localStorage.getItem('tpsCart');
             if (savedCart) {
-                cart = JSON.parse(savedCart);
+                try {
+                    cart = JSON.parse(savedCart);
+                    // Asegurarse de que cart es un array
+                    if (!Array.isArray(cart)) {
+                        cart = [];
+                    }
+                } catch (e) {
+                    console.error("Error al parsear el carrito guardado:", e);
+                    cart = []; // Resetear si hay error al parsear
+                }
                 updateCart();
                  // No renderProducts aquí, se hace después de cargar los productos
             }
