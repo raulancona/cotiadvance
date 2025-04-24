@@ -636,7 +636,7 @@
             });
 
             document.getElementById('nextToFormBtn').addEventListener('click', goToFormStep);
-            document.getElementById('backToCart').addEventListener('click', backToCartStep);
+            document.getElementById('backToCart').addEventListener('click', backToCotizadorStep); // CORREGIDO: Llamar a backToCotizadorStep para volver al paso 1
 
             document.getElementById('generatePdfBtn').addEventListener('click', generatePdf);
             document.getElementById('sendWhatsappBtn').addEventListener('click', sendWhatsappQuote);
@@ -717,8 +717,8 @@
              }
         }
 
-        // Transición de vuelta al paso del carrito
-        function backToCartStep() {
+        // Transición de vuelta al paso del cotizador (Paso 1)
+        function backToCotizadorStep() { // CORREGIDO: Renombrado para mayor claridad
             step2.classList.remove('active');
             step1.classList.add('active');
         }
@@ -796,16 +796,14 @@
                 noProductsMessage.classList.remove('hidden');
                 container.classList.add('grid-cols-1');
                 container.classList.remove('md:grid-cols-2', 'lg:grid-cols-3');
-                // Ocultar paginación si no hay productos
-                document.getElementById('pagination').classList.add('hidden');
+                document.getElementById('pagination').classList.add('hidden'); // Ocultar paginación
                 return;
             }
 
             noProductsMessage.classList.add('hidden');
             container.classList.remove('grid-cols-1');
             container.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
-             // Mostrar paginación si hay productos
-             document.getElementById('pagination').classList.remove('hidden');
+             document.getElementById('pagination').classList.remove('hidden'); // Mostrar paginación
 
 
             productsOnPage.forEach(product => {
