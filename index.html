@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cotizador TPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tpsDarkBlue: '#023047',
+                        tpsOrange: '#fb8500',
+                        tpsWhite: '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -44,7 +57,7 @@
             position: fixed;
             bottom: 20px;
             left: 20px; /* Posición en la esquina inferior izquierda */
-            background-color: #4f46e5; /* Indigo 600 */
+            background-color: #023047; /* tpsDarkBlue */
             color: white;
             border-radius: 50%;
             width: 60px;
@@ -66,7 +79,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: #ef4444; /* Red 500 */
+            background-color: #fb8500; /* tpsOrange */
             color: white;
             font-size: 0.75rem; /* text-xs */
             font-weight: bold;
@@ -139,6 +152,40 @@
         .step.active {
             display: block; /* Mostrar solo el paso activo */
         }
+
+         /* Estilo para el modal de agregar producto personalizado */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-center;
+            z-index: 1100; /* Por encima del panel del carrito */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease-in-out;
+        }
+         .modal-overlay.visible .modal {
+             transform: translateY(0);
+         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -146,7 +193,7 @@
         <header class="mb-10 flex flex-col sm:flex-row items-center justify-center">
             <img src="logotps.png" alt="Logo TPS Recubrimientos" class="h-16 mb-4 sm:mb-0 sm:mr-4">
             <div>
-                <h1 class="text-4xl font-bold text-center text-indigo-700 mb-2">Cotizador TPS</h1>
+                <h1 class="text-4xl font-bold text-center text-tpsDarkBlue mb-2">Cotizador TPS</h1>
                 <p class="text-center text-gray-600">Genera cotizaciones rápidas para prospectos</p>
             </div>
         </header>
@@ -190,7 +237,7 @@
                                 <option value="price-desc">Precio (Mayor a Menor)</option>
                             </select>
                         </div>
-                         <button id="applyFilters" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center md:mt-0 mt-4">
+                         <button id="applyFilters" class="w-full bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center md:mt-0 mt-4">
                             <i class="fas fa-filter mr-2"></i> Aplicar Filtros
                         </button>
                     </div>
@@ -288,6 +335,22 @@
                  <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
             </div>
             <div class="cart-panel-footer">
+                 <div class="mb-6 p-4 bg-gray-100 rounded-md">
+                     <h3 class="text-lg font-semibold mb-3 text-gray-800">Agregar Producto Personalizado</h3>
+                     <div class="mb-2">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
+                         <input type="text" id="customProductDescription" class="w-full p-2 border border-gray-300 rounded-md">
+                     </div>
+                      <div class="mb-4">
+                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio:</label>
+                         <input type="number" id="customProductPrice" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
+                     </div>
+                      <button id="addCustomProductBtn" class="w-full bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center">
+                         <i class="fas fa-plus-circle mr-2"></i> Agregar a Cotización
+                     </button>
+                 </div>
+
+
                  <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Descuento Global (%)</label>
                     <input type="number" id="globalDiscountPanel" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
@@ -317,7 +380,7 @@
                 </div>
 
                 <div class="mt-6">
-                    <button id="nextToFormBtn" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
+                    <button id="nextToFormBtn" class="w-full bg-tpsDarkBlue text-tpsWhite py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300 flex items-center justify-center disabled:opacity-50" disabled>
                         Siguiente <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                      <button id="clearCartPanelBtn" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center mt-3">
@@ -343,6 +406,7 @@
         let products = []; // Array para almacenar los productos cargados del JSON
         let cart = [];
         let filteredProducts = []; // Array para almacenar los productos filtrados
+        let customProductCounter = 0; // Contador para generar IDs únicos para productos personalizados
 
         // Variables para paginación
         const itemsPerPage = 9; // Mostrar 9 productos por página (3x3 grid)
@@ -365,6 +429,7 @@
 
         // Función para cargar productos desde el archivo JSON
         function loadProducts() {
+            // *** ACTUALIZADO: Cargar desde productos.json ***
             fetch('productos.json') // Ruta a tu archivo JSON
                 .then(response => {
                     // Verificar si la respuesta es correcta (código 200-299)
@@ -448,6 +513,9 @@
 
             // Listener para el descuento global en el panel del carrito
             document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
+
+            // Listener para el botón de agregar producto personalizado
+            document.getElementById('addCustomProductBtn').addEventListener('click', addCustomProductToCart);
 
 
             // Listeners para abrir y cerrar el panel del carrito
@@ -645,12 +713,12 @@
                         </div>
                     </div>
                     <div class="p-4 border-t border-gray-200 flex flex-col"> <div class="flex justify-between items-center mb-3">
-                            <span class="font-bold text-indigo-600 text-lg">$${displayPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span class="font-bold text-tpsDarkBlue text-lg">$${displayPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                          </div>
                          <div class="flex items-center justify-between">
                             <label for="qty-${product.Clave}" class="text-sm font-medium text-gray-700 mr-2">Cantidad:</label>
                             <input type="number" id="qty-${product.Clave}" value="${currentQuantity}" min="1" class="quantity-input w-16 p-1 border border-gray-300 rounded-md text-center text-sm">
-                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white py-1 px-3 rounded-md text-sm transition duration-300 ml-auto"
+                            <button class="add-to-cart ${isInCart ? 'bg-gray-400' : 'bg-tpsOrange hover:bg-orange-600'} text-tpsWhite py-1 px-3 rounded-md text-sm transition duration-300 ml-auto"
                                     data-id="${product.Clave}" ${isInCart ? 'disabled' : ''}>
                                 ${isInCart ? '<i class="fas fa-check mr-1"></i> Agregado' : '<i class="fas fa-cart-plus mr-1"></i> Agregar'}
                             </button>
@@ -671,7 +739,7 @@
                     const quantity = parseInt(quantityInput.value) || 1; // Default a 1 si no es un número válido o está vacío
 
                     // Deshabilitar el botón y cambiar texto inmediatamente al agregar
-                    button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    button.classList.remove('bg-tpsOrange', 'hover:bg-orange-600');
                     button.classList.add('bg-gray-400');
                     button.disabled = true;
                     button.innerHTML = '<i class="fas fa-check mr-1"></i> Agregado';
@@ -699,6 +767,46 @@
                  }
              });
         }
+
+        // Función para agregar un producto personalizado al carrito
+        function addCustomProductToCart() {
+            const descriptionInput = document.getElementById('customProductDescription');
+            const priceInput = document.getElementById('customProductPrice');
+
+            const description = descriptionInput.value.trim();
+            const price = parseFloat(priceInput.value);
+
+            // Validar inputs
+            if (description === '' || isNaN(price) || price < 0) {
+                showNotification('Por favor, ingresa una descripción y un precio válido para el producto personalizado.', 'bg-yellow-500');
+                return;
+            }
+
+            // Generar una clave única temporal para el producto personalizado
+            const customProductId = `custom-${Date.now()}-${customProductCounter++}`;
+
+            // Crear el objeto del producto personalizado
+            const customProduct = {
+                Clave: customProductId,
+                Descripcion: description,
+                PrecioPublico: price, // Ya es un número por parseFloat
+                quantity: 1 // Cantidad inicial 1
+                // No tiene otras propiedades como category, image, etc.
+            };
+
+            // Agregar el producto personalizado al carrito
+            cart.push(customProduct);
+
+            // Limpiar los campos del formulario
+            descriptionInput.value = '';
+            priceInput.value = '';
+
+            // Actualizar la interfaz del carrito
+            updateCart();
+            showNotification(`"${description}" agregado a la cotización.`, 'bg-green-600');
+            saveCart(); // Guardar cambios
+        }
+
 
         // Actualizar cantidad de un item en el carrito desde la tarjeta de producto o el panel
         function updateCartItemQuantity(productId, newQuantity) {
@@ -730,7 +838,7 @@
                             if (newQuantity <= 0) {
                                 const addButton = inputInCard.closest('.product-card').querySelector('.add-to-cart');
                                 addButton.classList.remove('bg-gray-400');
-                                addButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                                addButton.classList.add('bg-tpsOrange', 'hover:bg-orange-600');
                                 addButton.disabled = false;
                                 addButton.innerHTML = '<i class="fas fa-cart-plus mr-1"></i> Agregar';
                             }
@@ -743,29 +851,34 @@
 
         // Agregar producto al carrito con cantidad
         function addToCart(productId, quantity = 1) { // Default quantity to 1
-             // Encontrar el producto por Clave
+             // Encontrar el producto por Clave (funciona para productos JSON y personalizados)
             const product = products.find(p => p.Clave === productId);
-            if (!product) return; // Salir si el producto no existe
+            // Si no es un producto de la lista principal, podría ser un producto personalizado ya agregado
+            const existingCustomItem = cart.find(item => item.Clave === productId && typeof item.Clave === 'string' && item.Clave.startsWith('custom-'));
 
-            // Verificar si el producto ya está en el carrito usando la Clave
-            const existingItemIndex = cart.findIndex(item => item.Clave === productId);
 
-            if (existingItemIndex > -1) {
-                // Si el item existe, actualizar la cantidad
-                cart[existingItemIndex].quantity += quantity;
+            if (product) { // Es un producto de la lista principal
+                const existingItemIndex = cart.findIndex(item => item.Clave === productId);
+                 if (existingItemIndex > -1) {
+                     cart[existingItemIndex].quantity += quantity;
+                 } else {
+                     cart.push({...product, quantity: quantity});
+                 }
+                 showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización (${quantity} ${quantity > 1 ? 'unidades' : 'unidad'})`, 'bg-green-600');
+
+            } else if (existingCustomItem) { // Es un producto personalizado ya en el carrito
+                 existingCustomItem.quantity += quantity;
+                 showNotification(`${existingCustomItem.Descripcion || 'Producto Personalizado'} cantidad actualizada (${existingCustomItem.quantity} ${existingCustomItem.quantity > 1 ? 'unidades' : 'unidad'})`, 'bg-green-600');
             } else {
-                // Agregar nuevo item al carrito con la cantidad especificada
-                cart.push({
-                    // Copia todas las propiedades del producto (incluyendo Clave, Descripcion, PrecioPublico)
-                    ...product,
-                    quantity: quantity
-                });
+                 // Esto no debería pasar si la lógica es correcta, pero lo manejamos
+                 console.error("Intento de agregar un producto desconocido:", productId);
+                 showNotification('Error al agregar el producto.', 'bg-red-600');
+                 return; // Salir si el producto no existe en ninguna parte
             }
+
 
             updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
             // renderProducts(filteredProducts); // No re-renderizar aquí para mantener el estado de los inputs de cantidad
-             // Usamos la clave "Descripcion" para la notificación
-            showNotification(`${product.Descripcion || 'Producto'} agregado a la cotización (${quantity} ${quantity > 1 ? 'unidades' : 'unidad'})`); // Mostrar notificación con cantidad
              saveCart(); // Guardar carrito en localStorage
         }
 
@@ -820,15 +933,20 @@
             // Iterar sobre los items del carrito y renderizarlos en el panel
             cart.forEach(item => {
                 // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
+                 // Manejar tanto números como strings con coma
                 const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
                 const itemTotal = itemPrice * item.quantity;
                 subtotal += itemTotal; // Sumar al subtotal
 
                 const cartItem = document.createElement('div');
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
+
+                 // Determinar la imagen a mostrar (logo si no hay otra)
+                 const itemImage = item.image || companyInfo.logoUrl;
+
                 cartItem.innerHTML = `
                     <div class="flex items-center flex-grow mr-3">
-                        <img src="${companyInfo.logoUrl}" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3 rounded-md">
+                        <img src="${itemImage}" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3 rounded-md">
                         <div class="flex-grow">
                             <h4 class="text-sm font-medium text-gray-800">${item.Descripcion || 'Producto sin nombre'}</h4>
                             <p class="text-xs text-gray-500">$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
@@ -864,7 +982,7 @@
             document.querySelectorAll('#cartItemsPanel .remove-item').forEach(button => {
                 button.addEventListener('click', (e) => {
                     // Obtener el ID (Clave) del producto desde el atributo data-id del botón o su ancestro más cercano con data-id
-                    const productId = parseInt(e.target.closest('button').getAttribute('data-id'));
+                    const productId = e.target.closest('button').getAttribute('data-id'); // Clave puede ser string o number
                     removeFromCart(productId); // Llamar a la función para eliminar del carrito
                 });
             });
@@ -872,7 +990,7 @@
              // Agregar event listeners a los inputs de cantidad en el carrito
              document.querySelectorAll('.cart-quantity-input').forEach(input => {
                  input.addEventListener('change', (e) => {
-                     const productId = parseInt(e.target.getAttribute('data-id'));
+                     const productId = e.target.getAttribute('data-id'); // Clave puede ser string o number
                      const newQuantity = parseInt(e.target.value) || 0; // Permitir 0 para eliminar
                      updateCartItemQuantity(productId, newQuantity); // Reutilizar la función
                  });
@@ -884,8 +1002,8 @@
 
         // Eliminar producto del carrito
         function removeFromCart(productId) {
-             // Usamos la clave "Clave" para identificar el item a eliminar
-            cart = cart.filter(item => item.Clave !== productId);
+             // Usamos la clave "Clave" para identificar el item a eliminar (funciona para string o number)
+            cart = cart.filter(item => item.Clave != productId); // Usar != para comparar string y number
             updateCart(); // Actualizar la interfaz del carrito (panel y burbuja)
             renderProducts(filteredProducts); // Volver a renderizar productos para actualizar estado del botón
              saveCart(); // Guardar carrito en localStorage
@@ -921,7 +1039,7 @@
 
             // Encabezado del PDF (Información de la empresa y Logo)
             doc.setFontSize(20);
-            doc.setTextColor(40, 53, 147); // Color azul oscuro
+            doc.setTextColor('#023047'); // tpsDarkBlue
             doc.text(companyInfo.name, 14, 20);
 
             // Añadir Logo (asegúrate de que 'logotps.png' esté accesible)
@@ -955,6 +1073,9 @@
         // Función auxiliar para añadir el contenido principal del PDF (llamada después de cargar el logo)
         function addPdfContent(doc, prospectName, prospectCompany, projectName, salespersonName, salespersonPhone, salespersonEmail, globalDiscount) {
 
+            // Usar una fuente más agradable si está disponible (ej. Helvetica o Times)
+            doc.setFont('helvetica'); // Puedes probar con 'times' o 'courier' si helvetica no se ve bien
+
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
             doc.text(`Dirección: ${companyInfo.address}`, 14, 26);
@@ -963,7 +1084,7 @@
 
              // Información del Prospecto y Vendedor en el PDF
             doc.setFontSize(12);
-            doc.setTextColor(40, 53, 147);
+            doc.setTextColor('#023047'); // tpsDarkBlue
             doc.text('Datos del Prospecto:', 14, 45);
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(10);
@@ -976,7 +1097,7 @@
 
 
             doc.setFontSize(16);
-            doc.setTextColor(40, 53, 147);
+            doc.setTextColor('#023047'); // tpsDarkBlue
             doc.text('Detalle de la Cotización', 105, 85, { align: 'center' }); // Ajustar posición Y
 
             doc.setFontSize(10);
@@ -1002,7 +1123,7 @@
             const total = subtotalAfterDiscount + tax; // Calcular total
 
 
-            // Agregar filas de totales
+            // Agregar filas de totales - CORREGIDO para mostrar los valores
             tableData.push([
                 { content: 'Subtotal:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
                 '', '', '', // Columnas vacías
@@ -1039,8 +1160,8 @@
                 head: [['Producto', 'Presentación', 'Color', 'Precio Unitario', 'Cantidad', 'Total']], // Encabezados de la tabla
                 body: tableData, // Datos de la tabla
                 headStyles: {
-                    fillColor: [40, 53, 147], // Color de fondo del encabezado
-                    textColor: 255, // Color del texto del encabezado (blanco)
+                    fillColor: [2, 48, 71], // tpsDarkBlue en RGB
+                    textColor: 255, // Blanco
                     fontStyle: 'bold' // Estilo de fuente del encabezado
                 },
                 styles: {
@@ -1074,7 +1195,7 @@
                 }
             });
 
-            // Añadir comentarios fijos después de la tabla
+            // Añadir comentarios fijos después de la tabla - MEJORADO EL SALTO DE LÍNEA
             let finalY = doc.lastAutoTable.finalY || 105; // Obtener la posición final de la tabla, o un valor por defecto
 
             doc.setFontSize(10);
@@ -1089,14 +1210,19 @@
                 `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`
             ];
 
-            comments.forEach(comment => {
-                // Verificar si el comentario cabe en la página actual
-                if (finalY + 7 > doc.internal.pageSize.height - 20) { // Estimar espacio necesario para la línea
-                     doc.addPage();
-                     finalY = 20; // Reiniciar posición Y en la nueva página
-                }
-                doc.text(comment, 14, finalY);
-                finalY += 7; // Espacio entre líneas
+             comments.forEach(comment => {
+                // doc.text soporta saltos de línea automáticos si se especifica un ancho máximo
+                // Calculamos la posición Y para cada línea del comentario
+                const textLines = doc.splitTextToSize(comment, doc.internal.pageSize.width - 28); // Ancho máximo de la página - márgenes (14 a cada lado)
+                textLines.forEach(line => {
+                     if (finalY + 7 > doc.internal.pageSize.height - 20) { // Verificar si la línea cabe
+                         doc.addPage();
+                         finalY = 20; // Reiniciar posición Y en la nueva página
+                     }
+                     doc.text(line, 14, finalY);
+                     finalY += 7; // Espacio entre líneas
+                });
+                 finalY += 3; // Espacio adicional entre comentarios (opcional)
             });
         }
 
@@ -1107,7 +1233,7 @@
              const salespersonName = document.getElementById('salespersonName').value || 'Vendedor';
 
              // Validar si hay número de teléfono del prospecto
-             if (!prospectPhone || prospectPhone === 'N/A') {
+             if (!prospectPhone || prospectPhone.trim() === '' || prospectPhone === 'N/A') {
                  showNotification('Por favor, ingresa el número de teléfono del prospecto para enviar por WhatsApp.', 'bg-yellow-500');
                  return;
              }
