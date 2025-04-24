@@ -635,7 +635,7 @@
 
                 productCard.innerHTML = `
                     <div class="p-4 flex-grow"> <div class="h-32 bg-gray-100 flex items-center justify-center mb-4 overflow-hidden rounded-md">
-                             <img src="https://via.placeholder.com/150x100?text=No+Image" alt="${product.Descripcion || 'Producto sin nombre'}" class="h-full w-full object-cover">
+                             <img src="${companyInfo.logoUrl}" alt="${product.Descripcion || 'Producto sin nombre'}" class="h-full w-full object-contain">
                         </div>
                         <h3 class="font-semibold text-base mb-1 text-gray-800">${product.Descripcion || 'Producto sin nombre'}</h3>
                         <p class="text-gray-600 text-sm mb-2 line-clamp-3">${product.Descripcion || 'Sin descripción'}</p> <div class="text-gray-700 text-xs mt-2 space-y-1 hidden md:block"> <p><span class="font-semibold">Categoría:</span> N/A</p>
@@ -717,19 +717,23 @@
                  // para actualizar el estado del botón "Agregado" si un item fue eliminado.
                  // Si vino de la tarjeta, no re-renderizar para mantener el estado del input.
                  if (document.getElementById('cartPanelOverlay').classList.contains('visible')) {
+                      // Re-renderizar solo si el panel está abierto
                       renderProducts(filteredProducts);
                  } else {
                      // Si la actualización fue desde la tarjeta, actualizar el input de cantidad en la tarjeta
-                     const inputInCard = document.querySelector(`#productsContainer .product-card [data-id="${productId}"]`).closest('.flex.items-center').querySelector('.quantity-input');
+                     const inputInCard = document.querySelector(`#productsContainer .product-card [data-id="${productId}"]`);
                      if (inputInCard) {
-                          inputInCard.value = newQuantity > 0 ? newQuantity : 1; // Resetear a 1 si se eliminó
-                          // Si se eliminó, habilitar el botón "Agregar"
-                         if (newQuantity <= 0) {
-                             const addButton = inputInCard.closest('.product-card').querySelector('.add-to-cart');
-                             addButton.classList.remove('bg-gray-400');
-                             addButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-                             addButton.disabled = false;
-                             addButton.innerHTML = '<i class="fas fa-cart-plus mr-1"></i> Agregar';
+                         const quantityInput = inputInCard.closest('.flex.items-center').querySelector('.quantity-input');
+                         if (quantityInput) {
+                             quantityInput.value = newQuantity > 0 ? newQuantity : 1; // Resetear a 1 si se eliminó
+                             // Si se eliminó, habilitar el botón "Agregar"
+                            if (newQuantity <= 0) {
+                                const addButton = inputInCard.closest('.product-card').querySelector('.add-to-cart');
+                                addButton.classList.remove('bg-gray-400');
+                                addButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                                addButton.disabled = false;
+                                addButton.innerHTML = '<i class="fas fa-cart-plus mr-1"></i> Agregar';
+                            }
                          }
                      }
                  }
@@ -824,7 +828,7 @@
                 cartItem.className = 'cart-item fade-in p-3 border-b border-gray-200 flex justify-between items-center';
                 cartItem.innerHTML = `
                     <div class="flex items-center flex-grow mr-3">
-                        <img src="https://via.placeholder.com/40x40?text=No+Image" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3 rounded-md">
+                        <img src="${companyInfo.logoUrl}" alt="${item.Descripcion || 'Producto sin nombre'}" class="w-10 h-10 object-contain mr-3 rounded-md">
                         <div class="flex-grow">
                             <h4 class="text-sm font-medium text-gray-800">${item.Descripcion || 'Producto sin nombre'}</h4>
                             <p class="text-xs text-gray-500">$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
@@ -1080,7 +1084,7 @@
             const comments = [
                 "Notas Importantes:",
                 "• Esta cotización es válida por 30 días naturales a partir de la fecha de emisión.",
-                "• Los precios indicados están sujetos a modificación sin previo aviso",
+                "• Los precios indicados están sujetos a modificación sin previo aviso en caso de variación de costos de materia prima o tipo de cambio.",
                 "• Cualquier cambio en el alcance del suministro deberá ser formalizado vía correo y podrá implicar ajustes de precio y plazo.",
                 `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`
             ];
