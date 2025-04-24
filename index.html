@@ -97,7 +97,7 @@
             background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente oscuro */
             z-index: 1000; /* Por encima de todo, excepto quizás modals */
             display: flex;
-            justify-end; /* Alinea el panel a la derecha */
+            justify-content: end; /* Alinea el panel a la derecha */
              /* Animación de entrada/salida */
             visibility: hidden;
             opacity: 0;
@@ -130,7 +130,7 @@
             padding: 1rem;
             border-bottom: 1px solid #e5e7eb; /* gray-200 */
             display: flex;
-            justify-between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -163,7 +163,7 @@
             background-color: rgba(0, 0, 0, 0.6);
             display: flex;
             align-items: center;
-            justify-center;
+            justify-content: center;
             z-index: 1100; /* Por encima del panel del carrito */
             visibility: hidden;
             opacity: 0;
@@ -245,7 +245,13 @@
 
 
                 <div class="bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Productos Disponibles</h2>
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="text-xl font-semibold text-gray-800">Productos Disponibles</h2>
+                         <button id="openCustomProductModalBtn" class="bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center text-sm">
+                             <i class="fas fa-plus-circle mr-2"></i> Agregar Producto Personalizado
+                         </button>
+                    </div>
+
 
                     <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <p class="text-center text-gray-500">Cargando productos...</p>
@@ -335,22 +341,6 @@
                  <p class="text-gray-500 text-center py-10">Agrega productos para comenzar</p>
             </div>
             <div class="cart-panel-footer">
-                 <div class="mb-6 p-4 bg-gray-100 rounded-md">
-                     <h3 class="text-lg font-semibold mb-3 text-gray-800">Agregar Producto Personalizado</h3>
-                     <div class="mb-2">
-                         <label class="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
-                         <input type="text" id="customProductDescription" class="w-full p-2 border border-gray-300 rounded-md">
-                     </div>
-                      <div class="mb-4">
-                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio:</label>
-                         <input type="number" id="customProductPrice" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
-                     </div>
-                      <button id="addCustomProductBtn" class="w-full bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center">
-                         <i class="fas fa-plus-circle mr-2"></i> Agregar a Cotización
-                     </button>
-                 </div>
-
-
                  <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Descuento Global (%)</label>
                     <input type="number" id="globalDiscountPanel" value="0" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
@@ -391,6 +381,28 @@
         </div>
     </div>
 
+    <div id="customProductModalOverlay" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Agregar Producto Personalizado</h3>
+                <button id="closeCustomProductModalBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción:</label>
+                <input type="text" id="customProductDescription" class="w-full p-2 border border-gray-300 rounded-md">
+            </div>
+             <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Precio (sin IVA):</label>
+                <input type="number" id="customProductPrice" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md">
+            </div>
+             <button id="addCustomProductToCartBtn" class="w-full bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 transition duration-300 flex items-center justify-center">
+                 <i class="fas fa-plus-circle mr-2"></i> Agregar a Cotización
+             </button>
+        </div>
+    </div>
+
 
     <script>
         // Información de la empresa para el PDF
@@ -418,6 +430,15 @@
         const floatingCartBubble = document.getElementById('floatingCartBubble');
         const cartPanelOverlay = document.getElementById('cartPanelOverlay');
         const cartPanel = document.getElementById('cartPanel');
+
+        // Elementos del DOM para el modal de producto personalizado
+        const customProductModalOverlay = document.getElementById('customProductModalOverlay');
+        const openCustomProductModalBtn = document.getElementById('openCustomProductModalBtn');
+        const closeCustomProductModalBtn = document.getElementById('closeCustomProductModalBtn');
+        const addCustomProductToCartBtn = document.getElementById('addCustomProductToCartBtn');
+        const customProductDescriptionInput = document.getElementById('customProductDescription');
+        const customProductPriceInput = document.getElementById('customProductPrice');
+
 
         // Inicializar la aplicación cuando el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
@@ -514,8 +535,17 @@
             // Listener para el descuento global en el panel del carrito
             document.getElementById('globalDiscountPanel').addEventListener('input', updateCart);
 
-            // Listener para el botón de agregar producto personalizado
-            document.getElementById('addCustomProductBtn').addEventListener('click', addCustomProductToCart);
+            // Listener para abrir el modal de producto personalizado
+            openCustomProductModalBtn.addEventListener('click', openCustomProductModal);
+            // Listener para cerrar el modal de producto personalizado
+            closeCustomProductModalBtn.addEventListener('click', closeCustomProductModal);
+             customProductModalOverlay.addEventListener('click', (e) => {
+                 if (e.target.id === 'customProductModalOverlay') {
+                     closeCustomProductModal();
+                 }
+             });
+            // Listener para agregar producto personalizado desde el modal
+            addCustomProductToCartBtn.addEventListener('click', addCustomProductToCart);
 
 
             // Listeners para abrir y cerrar el panel del carrito
@@ -561,6 +591,22 @@
                  cartPanelOverlay.classList.add('hidden'); // Ocultar completamente después de la transición
             }, { once: true }); // Ejecutar el listener solo una vez
         }
+
+         // Abrir modal de producto personalizado
+        function openCustomProductModal() {
+             customProductModalOverlay.classList.remove('hidden');
+             customProductModalOverlay.classList.add('visible');
+             // Limpiar inputs al abrir
+             customProductDescriptionInput.value = '';
+             customProductPriceInput.value = '';
+        }
+
+         // Cerrar modal de producto personalizado
+        function closeCustomProductModal() {
+             customProductModalOverlay.classList.remove('visible');
+             customProductModalOverlay.classList.add('hidden');
+        }
+
 
         // Transición al paso del formulario
         function goToFormStep() {
@@ -770,11 +816,8 @@
 
         // Función para agregar un producto personalizado al carrito
         function addCustomProductToCart() {
-            const descriptionInput = document.getElementById('customProductDescription');
-            const priceInput = document.getElementById('customProductPrice');
-
-            const description = descriptionInput.value.trim();
-            const price = parseFloat(priceInput.value);
+            const description = customProductDescriptionInput.value.trim();
+            const price = parseFloat(customProductPriceInput.value);
 
             // Validar inputs
             if (description === '' || isNaN(price) || price < 0) {
@@ -790,16 +833,18 @@
                 Clave: customProductId,
                 Descripcion: description,
                 PrecioPublico: price, // Ya es un número por parseFloat
-                quantity: 1 // Cantidad inicial 1
+                quantity: 1, // Cantidad inicial 1
+                isCustom: true // Marcar como producto personalizado
                 // No tiene otras propiedades como category, image, etc.
             };
 
             // Agregar el producto personalizado al carrito
             cart.push(customProduct);
 
-            // Limpiar los campos del formulario
-            descriptionInput.value = '';
-            priceInput.value = '';
+            // Limpiar los campos del formulario y cerrar el modal
+            customProductDescriptionInput.value = '';
+            customProductPriceInput.value = '';
+            closeCustomProductModal();
 
             // Actualizar la interfaz del carrito
             updateCart();
@@ -810,7 +855,11 @@
 
         // Actualizar cantidad de un item en el carrito desde la tarjeta de producto o el panel
         function updateCartItemQuantity(productId, newQuantity) {
-             const existingItemIndex = cart.findIndex(item => item.Clave === productId);
+             // Convertir productId a string si es un número para asegurar la comparación con claves personalizadas
+             const idToFind = typeof productId === 'number' ? productId : productId.toString();
+
+             const existingItemIndex = cart.findIndex(item => item.Clave == idToFind); // Usar == para comparar number y string
+
              if (existingItemIndex > -1) {
                  if (newQuantity > 0) {
                      cart[existingItemIndex].quantity = newQuantity;
@@ -829,7 +878,10 @@
                       renderProducts(filteredProducts);
                  } else {
                      // Si la actualización fue desde la tarjeta, actualizar el input de cantidad en la tarjeta
-                     const inputInCard = document.querySelector(`#productsContainer .product-card [data-id="${productId}"]`);
+                     // Convertir productId a string para la selección del selector
+                     const selectorId = typeof productId === 'number' ? productId : `'${productId}'`;
+                     const inputInCard = document.querySelector(`#productsContainer .product-card [data-id="${selectorId}"]`);
+
                      if (inputInCard) {
                          const quantityInput = inputInCard.closest('.flex.items-center').querySelector('.quantity-input');
                          if (quantityInput) {
@@ -854,7 +906,7 @@
              // Encontrar el producto por Clave (funciona para productos JSON y personalizados)
             const product = products.find(p => p.Clave === productId);
             // Si no es un producto de la lista principal, podría ser un producto personalizado ya agregado
-            const existingCustomItem = cart.find(item => item.Clave === productId && typeof item.Clave === 'string' && item.Clave.startsWith('custom-'));
+            const existingCustomItem = cart.find(item => item.Clave === productId && item.isCustom); // Usar isCustom para identificar personalizados
 
 
             if (product) { // Es un producto de la lista principal
@@ -1106,51 +1158,55 @@
 
 
             // Tabla de productos
-            const tableData = cart.map(item => [
-                item.Descripcion || 'N/A', // Descripción del producto
-                'N/A', // Presentación (no en tu JSON)
-                'N/A', // Color (no en tu JSON)
-                `$${(parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Precio Unitario
-                item.quantity,
-                `$${((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Total por item
-            ]);
+            const tableData = cart.map(item => {
+                 // Asegurar que item.PrecioPublico sea un número antes de multiplicar, manejando la coma decimal
+                 const itemPrice = parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0;
+                 const itemTotal = itemPrice * item.quantity;
+                 return [
+                    item.Descripcion || 'N/A', // Descripción del producto
+                    'N/A', // Presentación (no en tu JSON)
+                    'N/A', // Color (no en tu JSON)
+                    `$${itemPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, // Precio Unitario
+                    item.quantity,
+                    `$${itemTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` // Total por item
+                 ];
+            });
 
             // Calcular totales
             const subtotal = cart.reduce((sum, item) => sum + ((parseFloat((item.PrecioPublico || '0').toString().replace(',', '.')) || 0) * item.quantity), 0);
+            const globalDiscount = parseFloat(document.getElementById('globalDiscountPanel').value) || 0;
             const discountAmount = subtotal * (globalDiscount / 100);
             const subtotalAfterDiscount = subtotal - discountAmount;
             const tax = subtotalAfterDiscount * 0.16; // Calcular IVA (16%) sobre el subtotal con descuento
             const total = subtotalAfterDiscount + tax; // Calcular total
 
 
-            // Agregar filas de totales - CORREGIDO para mostrar los valores
+            // Agregar filas de totales - CORREGIDO para mostrar los valores correctamente
+            // Usamos colSpan para que los totales se alineen debajo de la columna "Total"
             tableData.push([
-                { content: 'Subtotal:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                '', '', '', // Columnas vacías
+                { content: 'Subtotal:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                 `$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
-            tableData.push([
-                 { content: `Descuento (${globalDiscount}%):`, colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', '', '', // Columnas vacías
-                 { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
-            ]);
+            if (globalDiscount > 0) { // Solo mostrar descuento si es mayor a 0
+                 tableData.push([
+                     { content: `Descuento (${globalDiscount}%):`, colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
+                     { content: `-$${discountAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { textColor: [220, 38, 38], fontStyle: 'bold' } } // Color rojo para descuento
+                 ]);
+                  tableData.push([
+                     { content: 'Subtotal con Descuento:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
+                     `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                 ]);
+            }
 
-             tableData.push([
-                { content: 'Subtotal con Descuento:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                '', '', '', // Columnas vacías
-                `$${subtotalAfterDiscount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
-            ]);
 
             tableData.push([
-                { content: 'IVA (16%):', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', '', '', // Columnas vacías
+                { content: 'IVA (16%):', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                 `$${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
             ]);
 
             tableData.push([
-                { content: 'Total:', colSpan: 4, styles: { fontStyle: 'bold', halign: 'right' } },
-                 '', '', '', // Columnas vacías
+                { content: 'Total:', colSpan: 5, styles: { fontStyle: 'bold', halign: 'right' } },
                 { content: `$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, styles: { fontStyle: 'bold', textColor: [40, 53, 147] } } // Color azul oscuro para total
             ]);
 
@@ -1195,7 +1251,7 @@
                 }
             });
 
-            // Añadir comentarios fijos después de la tabla - MEJORADO EL SALTO DE LÍNEA
+            // Añadir comentarios fijos después de la tabla - SIMPLIFICADO Y CORREGIDO SALTO DE LÍNEA
             let finalY = doc.lastAutoTable.finalY || 105; // Obtener la posición final de la tabla, o un valor por defecto
 
             doc.setFontSize(10);
@@ -1203,17 +1259,12 @@
             finalY += 15; // Espacio después de la tabla
 
             const comments = [
-                "Notas Importantes:",
-                "• Esta cotización es válida por 30 días naturales a partir de la fecha de emisión.",
-                "• Los precios indicados están sujetos a modificación sin previo aviso en caso de variación de costos de materia prima o tipo de cambio.",
-                "• Cualquier cambio en el alcance del suministro deberá ser formalizado vía correo y podrá implicar ajustes de precio y plazo.",
-                `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`
+                "• Cotización válida por 30 días naturales.",
+                "• Precios sujetos a cambio sin previo aviso por ajustes externos."
             ];
 
              comments.forEach(comment => {
-                // doc.text soporta saltos de línea automáticos si se especifica un ancho máximo
-                // Calculamos la posición Y para cada línea del comentario
-                const textLines = doc.splitTextToSize(comment, doc.internal.pageSize.width - 28); // Ancho máximo de la página - márgenes (14 a cada lado)
+                const textLines = doc.splitTextToSize(comment, doc.internal.pageSize.width - 28); // Ancho máximo de la página - márgenes
                 textLines.forEach(line => {
                      if (finalY + 7 > doc.internal.pageSize.height - 20) { // Verificar si la línea cabe
                          doc.addPage();
@@ -1224,6 +1275,18 @@
                 });
                  finalY += 3; // Espacio adicional entre comentarios (opcional)
             });
+
+             // Añadir el comentario del vendedor
+             const salespersonComment = `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
+             const salespersonCommentLines = doc.splitTextToSize(salespersonComment, doc.internal.pageSize.width - 28);
+             salespersonCommentLines.forEach(line => {
+                 if (finalY + 7 > doc.internal.pageSize.height - 20) {
+                     doc.addPage();
+                     finalY = 20;
+                 }
+                 doc.text(line, 14, finalY);
+                 finalY += 7;
+             });
         }
 
         // Función para enviar cotización por WhatsApp
@@ -1264,11 +1327,10 @@
              whatsappMessage += `\nIVA (16%): $${tax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
              whatsappMessage += `\nTotal: *$${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}*`; // Total en negritas
 
-             // Agregar comentarios fijos
+             // Agregar comentarios fijos simplificados
              whatsappMessage += `\n\nNotas Importantes:\n`;
-             whatsappMessage += `• Esta cotización es válida por 30 días naturales a partir de la fecha de emisión.\n`;
-             whatsappMessage += `• Los precios indicados están sujetos a modificación sin previo aviso en caso de variación de costos de materia prima o tipo de cambio.\n`;
-             whatsappMessage += `• Cualquier cambio en el alcance del suministro deberá ser formalizado vía correo y podrá implicar ajustes de precio y plazo.\n`;
+             whatsappMessage += `• Cotización válida por 30 días naturales.\n`;
+             whatsappMessage += `• Precios sujetos a cambio sin previo aviso por ajustes externos.\n`;
              const salespersonPhone = document.getElementById('salespersonPhone').value || 'N/A';
              const salespersonEmail = document.getElementById('salespersonEmail').value || 'N/A';
              whatsappMessage += `• Para dudas o aclaraciones, contactar a ${salespersonName} al ${salespersonPhone} o ${salespersonEmail}.`;
