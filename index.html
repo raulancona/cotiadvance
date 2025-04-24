@@ -365,7 +365,7 @@
 
         // Función para cargar productos desde el archivo JSON
         function loadProducts() {
-            fetch('csvjson.json') // Ruta a tu archivo JSON
+            fetch('productos.json') // Ruta a tu archivo JSON
                 .then(response => {
                     // Verificar si la respuesta es correcta (código 200-299)
                     if (!response.ok) {
@@ -382,7 +382,7 @@
                 .catch(error => {
                     console.error("No se pudo cargar el archivo de productos:", error);
                     // Mostrar un mensaje de error en la interfaz si la carga falla
-                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "csvjson.json" esté en la misma carpeta y tenga el formato JSON correcto.</p>';
+                    document.getElementById('productsContainer').innerHTML = '<p class="text-red-600 text-center">Error al cargar los productos. Asegúrate de que "productos.json" esté en la misma carpeta y tenga el formato JSON correcto.</p>';
                 });
         }
 
