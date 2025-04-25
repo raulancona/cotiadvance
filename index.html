@@ -22,90 +22,112 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
-    /* Estilos esenciales (sin cambios) */
+    /* Estilos esenciales */
     .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
     .fade-in { animation: fadeIn 0.3s ease-in-out; }
     @keyframes fadeIn { from {opacity:0;transform:translateY(10px);} to {opacity:1;transform:translateY(0);} }
     .custom-scrollbar::-webkit-scrollbar { width:6px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background:#888; border-radius:3px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background:#555; }
-    .floating-cart-bubble {
-      position:fixed; bottom:20px; left:20px;
-      background:#023047; color:#fff; border-radius:50%;
-      width:60px; height:60px; display:flex;
-      align-items:center; justify-content:center;
-      cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      transition:transform .3s; z-index:1000;
-    }
+    .floating-cart-bubble { position:fixed; bottom:20px; left:20px; background:#023047; color:#fff; border-radius:50%; width:60px; height:60px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.2); transition:transform .3s; z-index:1000; }
     .floating-cart-bubble:hover { transform:scale(1.1); }
-    .floating-cart-bubble .cart-count {
-      position:absolute; top:-5px; right:-5px;
-      background:#fb8500; color:#fff; font-size:.75rem;
-      font-weight:bold; padding:2px 6px; border-radius:9999px;
-    }
-    .cart-panel-overlay {
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.5); display:flex; justify-content:end;
-      visibility:hidden; opacity:0; transition:visibility .3s,opacity .3s;
-    }
+    .floating-cart-bubble .cart-count { position:absolute; top:-5px; right:-5px; background:#fb8500; color:#fff; font-size:.75rem; font-weight:bold; padding:2px 6px; border-radius:9999px; }
+    .cart-panel-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:end; visibility:hidden; opacity:0; transition:visibility .3s,opacity .3s; }
     .cart-panel-overlay.visible { visibility:visible; opacity:1; }
-    .cart-panel {
-      background:#fff; width:90%; max-width:400px; height:100%;
-      box-shadow:-4px 0 12px rgba(0,0,0,0.2);
-      display:flex; flex-direction:column; transform:translateX(100%);
-      transition:transform .3s;
-    }
+    .cart-panel { background:#fff; width:90%; max-width:400px; height:100%; box-shadow:-4px 0 12px rgba(0,0,0,0.2); display:flex; flex-direction:column; transform:translateX(100%); transition:transform .3s; }
     .cart-panel.open { transform:translateX(0); }
     .cart-panel-header, .cart-panel-footer { padding:1rem; border-color:#e5e7eb; }
     .cart-panel-header { border-bottom:1px solid; display:flex; justify-content:space-between; align-items:center; }
     .cart-panel-body { flex-grow:1; overflow-y:auto; padding:1rem; }
     .step { display:none; }
     .step.active { display:block; }
-    .modal-overlay {
-      position:fixed; top:0; left:0; width:100%; height:100%;
-      background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center;
-      visibility:hidden; opacity:0; transition:visibility .3s,opacity .3s; z-index:1100;
-    }
+    .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; visibility:hidden; opacity:0; transition:visibility .3s,opacity .3s; z-index:1100; }
     .modal-overlay.visible { visibility:visible; opacity:1; }
-    .modal {
-      background:#fff; padding:1.5rem; border-radius:.5rem;
-      box-shadow:0 4px 12px rgba(0,0,0,0.2);
-      width:90%; max-width:400px; transform:translateY(-20px);
-      transition:transform .3s;
-    }
+    .modal { background:#fff; padding:1.5rem; border-radius:.5rem; box-shadow:0 4px 12px rgba(0,0,0,0.2); width:90%; max-width:400px; transform:translateY(-20px); transition:transform .3s; }
     .modal-overlay.visible .modal { transform:translateY(0); }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
-
   <div class="container mx-auto px-4 py-8">
-    <!-- Header (sin cambios) -->
     <header class="mb-10 flex flex-col sm:flex-row items-center justify-center">
       <img src="logotps.png" alt="Logo TPS" class="h-16 mb-4 sm:mb-0 sm:mr-4"/>
       <div>
         <h1 class="text-4xl font-bold text-center text-tpsDarkBlue mb-2">Cotizador TPS</h1>
         <p class="text-center text-gray-600">Genera cotizaciones rápidas</p>
-      </div>
+      <//div>
       <button id="openCalculatorModalBtn" class="ml-0 sm:ml-6 mt-4 sm:mt-0 bg-tpsOrange text-tpsWhite py-2 px-4 rounded-md hover:bg-orange-600 flex items-center text-sm">
         <i class="fas fa-calculator mr-2"></i> Calculadora
       </button>
     </header>
 
     <div id="appContainer" class="relative">
-      <!-- Paso 1 (sin cambios en estructura) -->
       <div id="step1" class="step active">
-        <!-- Filtros ... (igual que antes) -->
+        <!-- Filtros y Productos idénticos a tu versión original -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6">
+          <h2 class="text-xl font-semibold mb-4">Filtros</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <input id="filterKeyword1" placeholder="Clave 1" class="border p-2 rounded"/>
+            <input id="filterKeyword2" placeholder="Clave 2" class="border p-2 rounded"/>
+            <input id="filterKeyword3" placeholder="Clave 3" class="border p-2 rounded"/>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div class="flex space-x-2"><input id="minPrice" type="number" placeholder="Mín" class="border p-2 rounded"/><input id="maxPrice" type="number" placeholder="Máx" class="border p-2 rounded"/></div>
+            <select id="sortBy" class="border p-2 rounded">
+              <option value="name-asc">Nombre A-Z</option>
+              <option value="name-desc">Nombre Z-A</option>
+              <option value="price-asc">Precio ↑</option>
+              <option value="price-desc">Precio ↓</option>
+            </select>
+            <button id="applyFilters" class="bg-tpsDarkBlue text-white py-2 rounded flex items-center justify-center">
+              <i class="fas fa-filter mr-2"></i> Aplicar
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold">Productos</h2>
+            <button id="openCustomProductModalBtn" class="bg-tpsOrange text-white py-2 px-4 rounded flex items-center text-sm">
+              <i class="fas fa-plus mr-2"></i> Personalizado
+            </button>
+          </div>
+          <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <p class="text-gray-500 text-center">Cargando...</p>
+          </div>
+          <div id="noProductsMessage" class="hidden text-center py-10 text-gray-500"><i class="fas fa-box-open text-4xl mb-3"></i>No hay productos</div>
+          <div id="pagination" class="flex justify-center items-center mt-6 space-x-4">
+            <button id="prevPageBtn" class="bg-gray-300 py-2 px-4 rounded disabled:opacity-50"><i class="fas fa-arrow-left mr-2"></i>Anterior</button>
+            <span id="pageInfo">Página 1 de 1</span>
+            <button id="nextPageBtn" class="bg-gray-300 py-2 px-4 rounded disabled:opacity-50">Siguiente<i class="fas fa-arrow-right ml-2"></i></button>
+          </div>
+        </div>
       </div>
 
-      <!-- Paso 2 (sin cambios en estructura) -->
       <div id="step2" class="step">
-        <!-- Formulario ... (igual que antes) -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-semibold mb-6">Datos</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input id="prospectName" placeholder="Nombre prospecto" class="border p-2 rounded"/>
+            <input id="prospectCompany" placeholder="Empresa prospecto" class="border p-2 rounded"/>
+            <input id="projectName" placeholder="Proyecto" class="border p-2 rounded"/>
+            <input id="prospectPhone" placeholder="Teléfono (WhatsApp)" class="border p-2 rounded"/>
+            <input id="salespersonName" placeholder="Nombre vendedor" class="border p-2 rounded"/>
+            <input id="salespersonPhone" placeholder="Teléfono vendedor" class="border p-2 rounded"/>
+            <input id="salespersonEmail" placeholder="Correo vendedor" class="border p-2 rounded"/>
+          </div>
+          <div class="mt-6 flex flex-col sm:flex-row justify-between items-center">
+            <button id="backToCart" class="bg-gray-300 text-gray-800 py-2 px-4 rounded flex items-center mb-4 sm:mb-0"><i class="fas fa-arrow-left mr-2"></i> Volver</button>
+            <div class="flex space-x-3 w-full sm:w-auto">
+              <button id="generatePdfBtn" disabled class="bg-green-600 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center"><i class="fas fa-file-pdf mr-2"></i> PDF</button>
+              <button id="sendWhatsappBtn" disabled class="bg-green-500 text-white py-2 px-4 rounded disabled:opacity-50 flex items-center"><i class="fab fa-whatsapp mr-2"></i> WhatsApp</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Carrito flotante, panel, modales ... (idénticos) -->
-
+  <!-- Carrito flotante, panel y modales de producto personalizado idénticos -->
   <!-- Modal calculadora -->
   <div id="calculatorModalOverlay" class="modal-overlay">
     <div class="modal">
@@ -118,7 +140,6 @@
         <input id="mezclaRendimiento" type="number" step="0.01" placeholder="Rend m²/L" class="border p-2 rounded"/>
       </div>
       <div class="mb-6">
-        <!-- 🚀 Label actualizado aquí: -->
         <label class="block mb-1">Relación PARTE A : PARTE B : REDUCTOR</label>
         <div class="flex items-center space-x-2">
           <input id="mezclaParteA" type="number" value="4" min="0" class="w-1/3 p-2 border rounded text-center"/>
@@ -128,9 +149,7 @@
           <input id="mezclaParteC" type="number" value="0" min="0" class="w-1/3 p-2 border rounded text-center"/>
         </div>
       </div>
-      <button id="calcularMezclaBtn" class="w-full bg-tpsDarkBlue text-white py-2 rounded flex items-center justify-center mb-6">
-        <i class="fas fa-calculator mr-2"></i> Calcular
-      </button>
+      <button id="calcularMezclaBtn" class="w-full bg-tpsDarkBlue text-white py-2 rounded flex items-center justify-center mb-6"><i class="fas fa-calculator mr-2"></i> Calcular</button>
       <div id="mezclaResultado" class="hidden p-4 bg-gray-100 rounded mb-4">
         <p id="mezclaTotalNecesaria" class="mb-2"></p>
         <p id="mezclaResultadoParteA" class="mb-2"></p>
@@ -144,205 +163,205 @@
   </div>
 
   <script>
-    // Datos de empresa
-    const companyInfo = {
-      name:    "TPS Recubrimientos",
-      address: "Calle Ficticia #123",
-      phone:   "55 1234 5678",
-      email:   "contacto@tpsrecubrimientos.com",
-      logoUrl: "logotps.png"
-    };
-
-    // Carrito y productos
+    const companyInfo = { name: "TPS Recubrimientos", address: "Calle Ficticia #123", phone: "55 1234 5678", email: "contacto@tpsrecubrimientos.com", logoUrl: "logotps.png" };
     let products = [], cart = [], filteredProducts = [], customProductCounter = 0;
     const itemsPerPage = 9; let currentPage = 1;
 
-    // ---------- UTILIDADES ----------
-
-    // Formateo de moneda con separador de miles
-    const fmtNum = n => n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtMon = n => n.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-
-    // Función para convertir números a letras (en español)
+    // Formateo
+    const fmtNum = n => n.toLocaleString('es-MX',{ minimumFractionDigits:2, maximumFractionDigits:2 });
+    const fmtMon = n => n.toLocaleString('es-MX',{ style:'currency', currency:'MXN' });
     function numeroALetras(num) {
-      const unidades = ['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve',
-                        'diez','once','doce','trece','catorce','quince','dieciseis','diecisiete','dieciocho','diecinueve','veinte'];
-      if (num <= 20) return unidades[num];
-      if (num < 100) {
-        const decs = ['','','veinti','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
-        let d = Math.floor(num/10), u = num % 10;
-        return decs[d] + (u ? (d>2?' y ':'') + unidades[u] : '');
-      }
-      if (num < 1000) {
-        const c = Math.floor(num/100), r = num % 100;
-        return (c>1?unidades[c]:'') + 'ciento' + (r?' '+ numeroALetras(r):'');
-      }
-      if (num < 1000000) {
-        const m = Math.floor(num/1000), r = num % 1000;
-        return (m>1?numeroALetras(m)+' mil':'mil') + (r?' '+numeroALetras(r):'');
-      }
-      if (num < 1000000000000) {
-        const mill = Math.floor(num/1000000), r = num % 1000000;
-        return (mill>1?numeroALetras(mill)+' millones':'un millón') + (r?' '+numeroALetras(r):'');
-      }
+      const unidades = ['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciseis','diecisiete','dieciocho','diecinueve','veinte'];
+      if(num<=20) return unidades[num];
+      if(num<100){ const decs=['','','veinti','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa']; let d=Math.floor(num/10),u=num%10; return decs[d]+(u?(d>2?' y ':'')+unidades[u]:''); }
+      if(num<1000){ const c=Math.floor(num/100),r=num%100; return(c>1?unidades[c]:'')+'ciento'+(r?' '+numeroALetras(r):''); }
+      if(num<1000000){ const m=Math.floor(num/1000),r=num%1000; return(m>1?numeroALetras(m)+' mil':'mil')+(r?' '+numeroALetras(r):''); }
+      if(num<1000000000000){ const mill=Math.floor(num/1000000),r=num%1000000; return(mill>1?numeroALetras(mill)+' millones':'un millón')+(r?' '+numeroALetras(r):''); }
       return num.toString();
     }
+    function getSafePrice(val){ return parseFloat(String(val||'0').replace(',', '.'))||0; }
 
-    // Safe price parse
-    function getSafePrice(val) {
-      return parseFloat(String(val||'0').replace(',', '.'))||0;
+    document.addEventListener('DOMContentLoaded',()=>{ loadProducts(); setupEventListeners(); loadCart(); updateCart(); updateCartBubbleCount(); });
+
+    // Carga productos
+    function loadProducts(){
+      fetch('productos.json')
+        .then(r=>r.ok?r.json():Promise.reject(`HTTP ${r.status}`))
+        .then(data=>{
+          products = Array.isArray(data)?data:[];
+          filteredProducts=[...products];
+          applyFilters();
+        })
+        .catch(e=>{ document.getElementById('productsContainer').innerHTML=`<p class="text-red-600 text-center col-span-full">Error: ${e}</p>`; document.getElementById('pagination').classList.add('hidden'); });
     }
 
-    // ---------- INICIALIZACIÓN ----------
-    document.addEventListener('DOMContentLoaded',()=>{
-      loadProducts();
-      setupEventListeners();
-      loadCart();
-      updateCart();
-      updateCartBubbleCount();
-    });
+    // Carga carrito
+    function loadCart(){ const saved=localStorage.getItem('tpsCart'); try{ cart=saved?JSON.parse(saved):[]; }catch{ cart=[]; localStorage.removeItem('tpsCart'); }}
+    function saveCart(){ localStorage.setItem('tpsCart',JSON.stringify(cart)); updateCartBubbleCount(); }
 
-    // ... aquí irían loadProducts(), setupEventListeners(), loadCart() sin cambios ...
+    // Listeners
+    function setupEventListeners(){
+      ['filterKeyword1','filterKeyword2','filterKeyword3','minPrice','maxPrice'].forEach(id=>{ document.getElementById(id)?.addEventListener('input',()=>{ currentPage=1; applyFilters(); }); });
+      document.getElementById('applyFilters')?.addEventListener('click',()=>{ currentPage=1; applyFilters(); });
+      document.getElementById('sortBy')?.addEventListener('change',()=>{ currentPage=1; applyFilters(); });
+      document.getElementById('prevPageBtn')?.addEventListener('click',()=>{ if(currentPage>1){currentPage--; renderProducts(filteredProducts);} });
+      document.getElementById('nextPageBtn')?.addEventListener('click',()=>{ const totalPages=Math.ceil(filteredProducts.length/itemsPerPage); if(currentPage<totalPages){currentPage++; renderProducts(filteredProducts);} });
+      document.getElementById('globalDiscountPanel')?.addEventListener('input',updateCart);
+      document.getElementById('openCustomProductModalBtn')?.addEventListener('click',()=>document.getElementById('customProductModalOverlay').classList.add('visible'));
+      document.getElementById('closeCustomProductModalBtn')?.addEventListener('click',()=>document.getElementById('customProductModalOverlay').classList.remove('visible'));
+      document.getElementById('addCustomProductToCartBtn')?.addEventListener('click',addCustomProductToCart);
+      document.getElementById('openCalculatorModalBtn')?.addEventListener('click',()=>{ document.getElementById('calculatorModalOverlay').classList.add('visible'); document.getElementById('mezclaResultado').classList.add('hidden'); document.getElementById('mezclaError').classList.add('hidden'); });
+      document.getElementById('closeCalculatorModalBtn')?.addEventListener('click',()=>document.getElementById('calculatorModalOverlay').classList.remove('visible'));
+      document.getElementById('calcularMezclaBtn')?.addEventListener('click',calcularMezcla);
+      document.getElementById('floatingCartBubble')?.addEventListener('click',openCartPanel);
+      document.getElementById('closeCartPanel')?.addEventListener('click',closeCartPanel);
+      document.getElementById('nextToFormBtn')?.addEventListener('click',goToFormStep);
+      document.getElementById('backToCart')?.addEventListener('click',backToCotizadorStep);
+      document.getElementById('generatePdfBtn')?.addEventListener('click',generatePdf);
+      document.getElementById('sendWhatsappBtn')?.addEventListener('click',sendWhatsappQuote);
+      document.getElementById('clearCartPanelBtn')?.addEventListener('click',clearCart);
+    }
 
-    // ---------- RENDER PRODUCTOS ----------
+    // Filtrar
+    function applyFilters(){
+      const k1=(document.getElementById('filterKeyword1').value||'').toLowerCase();
+      const k2=(document.getElementById('filterKeyword2').value||'').toLowerCase();
+      const k3=(document.getElementById('filterKeyword3').value||'').toLowerCase();
+      const min=parseFloat(document.getElementById('minPrice').value)||0;
+      const max=parseFloat(document.getElementById('maxPrice').value)||Infinity;
+      const sortBy=document.getElementById('sortBy').value;
+      filteredProducts=products.filter(p=>{
+        const desc=(p.Descripcion||'').toLowerCase(); const price=getSafePrice(p.PrecioPublico);
+        return (!k1||desc.includes(k1))&&(!k2||desc.includes(k2))&&(!k3||desc.includes(k3))&&(price>=min&&price<=max);
+      });
+      sortProducts(filteredProducts,sortBy);
+      renderProducts(filteredProducts);
+    }
+    function sortProducts(arr,sortBy){ const [field,order]=sortBy.split('-'); arr.sort((a,b)=>{ let c=0; if(field==='name'){ c=(a.Descripcion||'').localeCompare(b.Descripcion||''); } else { c=getSafePrice(a.PrecioPublico)-getSafePrice(b.PrecioPublico);} return order==='asc'?c:-c; }); }
+
+    // Render
     function renderProducts(productsToRender){
-      const container = document.getElementById('productsContainer');
-      // ... validaciones ...
-      container.innerHTML = '';
-      const start = (currentPage-1)*itemsPerPage;
-      const end = start+itemsPerPage;
-      productsToRender.slice(start,end).forEach(p=>{
-        const price = getSafePrice(p.PrecioPublico);
-        const priceFmt = fmtMon(price);
-        const card = document.createElement('div');
-        card.className = 'product-card bg-white border rounded flex flex-col';
-        card.innerHTML = `
+      const container=document.getElementById('productsContainer'); const noProductsMsg=document.getElementById('noProductsMessage'); const paginationControls=document.getElementById('pagination'); const pageInfo=document.getElementById('pageInfo'); const prevBtn=document.getElementById('prevPageBtn'); const nextBtn=document.getElementById('nextPageBtn');
+      if(!container||!noProductsMsg||!paginationControls) return;
+      container.innerHTML='';
+      const total=productsToRender.length; const totalPages=Math.ceil(total/itemsPerPage);
+      if(currentPage<1) currentPage=1; if(currentPage>totalPages&&totalPages>0) currentPage=totalPages;
+      pageInfo.textContent=`Página ${totalPages>0?currentPage:0} de ${totalPages}`; prevBtn.disabled=currentPage<=1; nextBtn.disabled=currentPage>=totalPages;
+      if(total===0){ noProductsMsg.classList.remove('hidden'); paginationControls.classList.add('hidden'); return;} else { noProductsMsg.classList.add('hidden'); paginationControls.classList.remove('hidden'); }
+      const start=(currentPage-1)*itemsPerPage; const end=start+itemsPerPage;
+      productsToRender.slice(start,end).forEach(product=>{
+        const price=getSafePrice(product.PrecioPublico); const priceFmt=fmtMon(price);
+        const inCart=cart.find(i=>i.Clave===product.Clave);
+        const qty=inCart?inCart.quantity:1;
+        const card=document.createElement('div'); card.className='product-card bg-white border rounded flex flex-col';
+        card.innerHTML=`
           <div class="p-4 flex-grow">
-            <h3 class="font-semibold text-gray-800 mb-1">${p.Descripcion}</h3>
+            <div class="h-32 bg-gray-100 mb-4 flex items-center justify-center overflow-hidden rounded-md">
+              <img src="${product.imageUrl||companyInfo.logoUrl||'placeholder.png'}" alt="${product.Descripcion||''}" class="object-contain h-full w-full"/>
+            </div>
+            <h3 class="font-semibold text-gray-800 mb-1 h-12 overflow-hidden text-ellipsis">${product.Descripcion||''}</h3>
+            <p class="text-xs text-gray-500 mb-2">Clave: ${product.Clave||''}</p>
           </div>
           <div class="p-4 border-t flex items-center">
             <span class="font-bold text-tpsDarkBlue mr-auto">${priceFmt}</span>
-            <input type="number" value="1" min="1" class="quantity-input w-16 p-1 border rounded text-center mr-2" data-product-id="${p.Clave}"/>
-            <button class="add-to-cart bg-tpsOrange text-white py-1 px-3 rounded" data-product-id="${p.Clave}">
-              <i class="fas fa-cart-plus"></i>
+            <input type="number" value="${qty}" min="1" class="quantity-input w-16 p-1 border rounded text-center mr-2 text-sm appearance-none" data-product-id="${product.Clave}"/>
+            <button class="add-to-cart ${inCart?'bg-gray-400 cursor-not-allowed':'bg-tpsOrange hover:bg-orange-600'} text-white py-1 px-3 rounded text-sm" data-product-id="${product.Clave}" ${inCart?'disabled':''}>
+              ${inCart?'<i class="fas fa-check"></i>':'<i class="fas fa-cart-plus"></i>'}
             </button>
           </div>`;
         container.appendChild(card);
       });
-      // ... paginación, listeners, etc. ...
+      container.querySelectorAll('.add-to-cart').forEach(btn=>{ btn.addEventListener('click',e=>{ const id=e.currentTarget.dataset.productId; const input=e.currentTarget.parentElement.querySelector('input'); const q=parseInt(input.value)||1; addToCart(id,q); btn.disabled=true; btn.classList.remove('bg-tpsOrange','hover:bg-orange-600'); btn.classList.add('bg-gray-400','cursor-not-allowed'); btn.innerHTML='<i class="fas fa-check"></i>'; }); });
+      container.querySelectorAll('.quantity-input').forEach(input=>{ input.addEventListener('change',e=>{ const prod=e.currentTarget.dataset.productId; const n=parseInt(e.currentTarget.value,10); if(isNaN(n)||n<1){ e.currentTarget.value=1; updateCartItemQuantity(prod,1); showNotification('La cantidad debe ser al menos 1','bg-yellow-500 text-black'); } else if(cart.some(i=>i.Clave===prod)){ updateCartItemQuantity(prod,n); } }); });
     }
 
-    // ---------- ACTUALIZAR CARRITO EN PANTALLA ----------
-    function updateCart(){
-      const panel = document.getElementById('cartItemsPanel');
-      // ... limpiar, validar ...
-      let subtotal = 0;
-      cart.forEach(item=>{
-        const price = getSafePrice(item.PrecioPublico);
-        const totalItem = price*item.quantity;
-        subtotal += totalItem;
-        // construir cada línea con fmtMon(...)
-      });
-      const discountPct = parseFloat(document.getElementById('globalDiscountPanel').value)||0;
-      const discountAmt = subtotal * discountPct/100;
-      const subDesc = subtotal - discountAmt;
-      const iva = subDesc * 0.16;
-      const granTotal = subDesc + iva;
+    // Carrito panel
+    function openCartPanel(){ updateCart(); const over=document.getElementById('cartPanelOverlay'), panel=document.getElementById('cartPanel'); over.classList.add('visible'); over.classList.remove('hidden'); setTimeout(()=>panel.classList.add('open'),10); }
+    function closeCartPanel(){ const over=document.getElementById('cartPanelOverlay'), panel=document.getElementById('cartPanel'); panel.classList.remove('open'); panel.addEventListener('transitionend',()=>{ over.classList.remove('visible'); over.classList.add('hidden'); },{once:true}); }
+    function goToFormStep(){ if(!cart.length){ showNotification('Agrega productos primero.','bg-yellow-500 text-black'); return;} closeCartPanel(); document.getElementById('step1').classList.remove('active'); document.getElementById('step2').classList.add('active'); document.getElementById('generatePdfBtn').disabled=false; document.getElementById('sendWhatsappBtn').disabled=false; }
+    function backToCotizadorStep(){ document.getElementById('step2').classList.remove('active'); document.getElementById('step1').classList.add('active'); }
 
-      // Actualizar totales en UI con separadores
-      document.getElementById('subtotalPanel').textContent           = fmtMon(subtotal);
-      document.getElementById('discountAmountPanel').textContent     = '- ' + fmtMon(discountAmt);
-      document.getElementById('subtotalAfterDiscountPanel').textContent = fmtMon(subDesc);
-      document.getElementById('taxPanel').textContent                = fmtMon(iva);
-      document.getElementById('totalPanel').textContent              = fmtMon(granTotal);
+    // Añadir al carrito
+    function addCustomProductToCart(){ const desc=document.getElementById('customProductDescription'), priceIn=document.getElementById('customProductPrice'); if(!desc.value.trim()){ showNotification('Descripción vacía.','bg-yellow-500 text-black'); desc.focus(); return;} const p=parseFloat(priceIn.value); if(isNaN(p)||p<0){ showNotification('Precio inválido.','bg-yellow-500 text-black'); priceIn.focus(); return;} const id=`custom-${Date.now()}-${customProductCounter++}`; cart.push({Clave:id,Descripcion:desc.value.trim(),PrecioPublico:p,quantity:1,isCustom:true}); saveCart(); updateCart(); document.getElementById('customProductModalOverlay').classList.remove('visible'); desc.value=''; priceIn.value=''; showNotification('Producto personalizado agregado.','bg-green-600'); }
+    function addToCart(prod,qty=1){ if(qty<1){ showNotification('Cantidad mínima 1','bg-yellow-500 text-black'); return;} const idx=cart.findIndex(i=>i.Clave===prod); if(idx>-1){ cart[idx].quantity=qty; showNotification('Cantidad actualizada.','bg-blue-500'); } else { const p=products.find(x=>x.Clave===prod); if(p){ cart.push({...p,quantity:qty}); showNotification(p.Descripcion+' agregado.','bg-green-600'); } else { showNotification('Producto no encontrado.','bg-red-600'); return;} } saveCart(); updateCart(); }
+    function updateCartItemQuantity(prod,n){ const idx=cart.findIndex(i=>i.Clave===prod); if(idx>-1){ if(n>0){ cart[idx].quantity=n; } else { cart.splice(idx,1); renderProducts(filteredProducts); showNotification('Eliminado.','bg-blue-500'); } saveCart(); updateCart(); }}
+    function clearCart(){ if(!cart.length) return; if(confirm('¿Vaciar cotización?')){ cart=[]; saveCart(); updateCart(); renderProducts(filteredProducts); document.getElementById('globalDiscountPanel').value=0; showNotification('Cotización vaciada.','bg-green-600'); }}
 
-      // ... listeners de cantidad y borrar ...
+    // Update carrito UI
+    function updateCart(){ const cnt=document.getElementById('cartCountBubble'), body=document.getElementById('cartItemsPanel'); const subEl=document.getElementById('subtotalPanel'), discEl=document.getElementById('discountAmountPanel'), subDescEl=document.getElementById('subtotalAfterDiscountPanel'), taxEl=document.getElementById('taxPanel'), totEl=document.getElementById('totalPanel'), discIn=document.getElementById('globalDiscountPanel'); body.innerHTML=''; if(!cart.length){ body.innerHTML='<p class="text-gray-500 text-center py-10">Tu cotización está vacía.</p>'; subEl.textContent='$0.00'; discEl.textContent='-$0.00'; subDescEl.textContent='$0.00'; taxEl.textContent='$0.00'; totEl.textContent='$0.00'; document.getElementById('nextToFormBtn').disabled=true; updateCartBubbleCount(); return; } let subtotal=0; cart.forEach((item,i)=>{ const price=getSafePrice(item.PrecioPublico), tot=price*item.quantity; subtotal+=tot; const div=document.createElement('div'); div.className='cart-item fade-in p-3 border-b flex justify-between items-start gap-2'; div.innerHTML=`<div class="flex items-center mr-2 flex-grow min-w-0"><img src="${item.imageUrl||companyInfo.logoUrl||'placeholder.png'}" class="w-10 h-10 object-contain mr-3 flex-shrink-0"/><div class="min-w-0"><h4 class="font-medium text-sm truncate">${item.Descripcion}</h4><p class="text-xs text-gray-500">${fmtMon(price)} c/u</p></div></div><div class="flex items-center flex-shrink-0"><input type="number" value="${item.quantity}" min="1" class="cart-quantity-input w-16 p-1 border rounded text-center mr-2 text-sm" data-item-index="${i}"/><span class="font-semibold mr-3 w-20 text-right">${fmtMon(tot)}</span><button class="remove-item text-red-500 hover:text-red-700" data-item-index="${i}" title="Eliminar"><i class="fas fa-times"></i></button></div>`; body.appendChild(div); });
+      const discountPct=parseFloat(discIn.value)||0;
+      const discountAmt=subtotal*discountPct/100;
+      const subDesc=subtotal-discountAmt;
+      const iva=subDesc*0.16;
+      const grandTotal=subDesc+iva;
+      subEl.textContent           = fmtMon(subtotal);
+      discEl.textContent         = '- ' + fmtMon(discountAmt);
+      subDescEl.textContent      = fmtMon(subDesc);
+      taxEl.textContent          = fmtMon(iva);
+      totEl.textContent          = fmtMon(grandTotal);
+      document.getElementById('nextToFormBtn').disabled=false;
+      // listeners elimina y cambia qty
+      body.querySelectorAll('.remove-item').forEach(btn=>btn.addEventListener('click',e=>{ const idx=parseInt(e.currentTarget.dataset.itemIndex,10); if(!isNaN(idx)){ cart.splice(idx,1); saveCart(); updateCart(); if(!cart[idx]?.isCustom) renderProducts(filteredProducts); showNotification('Producto eliminado.','bg-blue-500'); }}));
+      body.querySelectorAll('.cart-quantity-input').forEach(input=>input.addEventListener('change',e=>{ const idx=parseInt(e.currentTarget.dataset.itemIndex,10), n=parseInt(e.currentTarget.value,10); if(!isNaN(idx)&&idx<cart.length){ if(isNaN(n)||n<1){ e.currentTarget.value=cart[idx].quantity; showNotification('Cantidad inválida.','bg-yellow-500 text-black'); } else { cart[idx].quantity=n; saveCart(); updateCart(); }}}));
+      updateCartBubbleCount();
+    }
+    function updateCartBubbleCount(){ const total=cart.reduce((s,i)=>s+(i.quantity||0),0); const cnt=document.getElementById('cartCountBubble'); cnt.textContent=total; document.getElementById('floatingCartBubble').classList.toggle('hidden', total===0);
     }
 
-    // ---------- GENERAR PDF ----------
-    function generatePdf(){
-      if (!cart.length) { alert('Agrega productos'); return; }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      // Función helper para formatear en PDF:
-      const fmt = n => n.toLocaleString('es-MX',{ style:'currency', currency:'MXN' });
-      // Datos de formulario...
-      // Carga de logo (igual)...
+    // Calculadora
+    function calcularMezcla(){ const area= parseFloat(document.getElementById('mezclaArea').value), rend=parseFloat(document.getElementById('mezclaRendimiento').value); const a=parseFloat(document.getElementById('mezclaParteA').value)||0, b=parseFloat(document.getElementById('mezclaParteB').value)||0, c=parseFloat(document.getElementById('mezclaParteC').value)||0; const resDiv=document.getElementById('mezclaResultado'), errDiv=document.getElementById('mezclaError'); if(isNaN(area)||area<=0){ showMezclaError('Área debe ser > 0'); document.getElementById('mezclaArea').focus(); return;} if(isNaN(rend)||rend<=0){ showMezclaError('Rendimiento debe ser > 0'); document.getElementById('mezclaRendimiento').focus(); return;} if(a<0||b<0||c<0){ showMezclaError('Las partes no pueden ser negativas'); return;} const sum=a+b+c; if(sum===0){ showMezclaError('La suma de partes no puede ser cero'); return;} const totalLts=area/rend, lpu=totalLts/sum; document.getElementById('mezclaTotalNecesaria').textContent=`Total mezcla necesaria: ${fmtNum(totalLts)} L`; document.getElementById('mezclaResultadoParteA').textContent=`Componente A: ${fmtNum(lpu*a)} L`; document.getElementById('mezclaResultadoParteB').textContent=`Componente B: ${fmtNum(lpu*b)} L`; const cp=document.getElementById('mezclaResultadoParteC'); if(c>0){ cp.textContent=`Componente C: ${fmtNum(lpu*c)} L`; cp.classList.remove('hidden'); } else cp.classList.add('hidden'); errDiv.classList.add('hidden'); resDiv.classList.remove('hidden'); }
+    function showMezclaError(msg){ const err=document.getElementById('mezclaError'), p=document.getElementById('mezclaErrorMessage'); p.textContent=msg; document.getElementById('mezclaResultado').classList.add('hidden'); err.classList.remove('hidden'); }
 
-      // Contenido de empresa, cliente, vendedor (igual)...
-
-      // Preparar tabla:
-      let subtotal = 0;
-      const body = cart.map(item=>{
-        const price = getSafePrice(item.PrecioPublico);
-        const total = price*item.quantity;
-        subtotal += total;
-        return [
-          item.Descripcion,
-          fmt(price),
-          item.quantity,
-          fmt(total)
-        ];
-      });
-      // Cálculos:
-      const discountPct = parseFloat(document.getElementById('globalDiscountPanel').value)||0;
-      const discountAmt = subtotal*discountPct/100;
-      const subDesc = subtotal - discountAmt;
-      const iva = subDesc*0.16;
-      const granTotal = subDesc + iva;
-
-      // Footers con colSpan:3 para alinear en la 4ª columna
-      const foot = [];
-      foot.push([
-        { content:'Subtotal:',      colSpan:3, styles:{ halign:'right', fontStyle:'bold' } },
-        { content: fmt(subtotal),   styles:{ halign:'right' } }
-      ]);
-      if (discountPct>0) {
-        foot.push([
-          { content:`Descuento (${discountPct}%):`, colSpan:3, styles:{ halign:'right', fontStyle:'bold', textColor:[220,38,38] } },
-          { content:`- ${fmt(discountAmt)}`, styles:{ halign:'right', textColor:[220,38,38] } }
-        ]);
-        foot.push([
-          { content:'Subtotal c/Desc.:', colSpan:3, styles:{ halign:'right', fontStyle:'bold' } },
-          { content: fmt(subDesc), styles:{ halign:'right' } }
-        ]);
-      }
-      foot.push([
-        { content:'IVA (16%):',       colSpan:3, styles:{ halign:'right', fontStyle:'bold' } },
-        { content: fmt(iva),          styles:{ halign:'right' } }
-      ]);
-      foot.push([
-        { content:'Total:',           colSpan:3, styles:{ halign:'right', fontStyle:'bold', fontSize:10 } },
-        { content: fmt(granTotal),    styles:{ halign:'right', fontStyle:'bold', fontSize:10 } }
-      ]);
-
-      // Generación de la tabla
-      doc.autoTable({
-        startY: 90,
-        head: [['Producto','Precio Unitario','Cantidad','Total']],
-        body,
-        foot,
-        theme:'grid',
-        headStyles:{ fillColor:[2,48,71], textColor:255, fontStyle:'bold' },
-        footStyles:{ fillColor:[240,240,240], textColor:0, fontStyle:'bold' },
-        styles:{ fontSize:8, cellPadding:2 },
-        columnStyles:{
-          0:{ cellWidth: 60 },
-          1:{ halign:'right', cellWidth:30 },
-          2:{ halign:'center', cellWidth:20 },
-          3:{ halign:'right', cellWidth:30 }
-        }
-      });
-
-      // Total en letra debajo de la tabla
-      const totalEnLetras = numeroALetras(Math.floor(granTotal)) +
-        ' pesos ' + String(Math.round((granTotal%1)*100)).padStart(2,'0') + '/100 M.N.';
-      doc.text(`Total en letra: ${totalEnLetras}`, 14, doc.lastAutoTable.finalY + 10);
-
-      doc.save(`Cotizacion_${new Date().toISOString().slice(0,10)}.pdf`);
+    // PDF y WhatsApp
+    function generatePdf(){ if(!cart.length){ showNotification('No hay productos','bg-yellow-500 text-black'); return;} const { jsPDF }=window.jspdf, doc=new jsPDF(); const fmt=n=>n.toLocaleString('es-MX',{ style:'currency', currency:'MXN' });
+      // Datos del form
+      const prospectName=document.getElementById('prospectName').value.trim()||'N/A';
+      const prospectCompany=document.getElementById('prospectCompany').value.trim()||'N/A';
+      const projectName=document.getElementById('projectName').value.trim()||'N/A';
+      const salespersonName=document.getElementById('salespersonName').value.trim()||'N/A';
+      const salespersonPhone=document.getElementById('salespersonPhone').value.trim()||'N/A';
+      const salespersonEmail=document.getElementById('salespersonEmail').value.trim()||'N/A';
+      const discountPct=parseFloat(document.getElementById('globalDiscountPanel').value)||0;
+      // Logo
+      const img=new Image(); img.crossOrigin='Anonymous'; img.onload=()=>{ try{ const ar=img.width/img.height; let w=50,h=w/ar; if(h>25){ h=25; w=h*ar;} doc.addImage(img,'PNG',195-w,10,w,h);}catch{} finally{ addPdfContent(doc,prospectName,prospectCompany,projectName,salespersonName,salespersonPhone,salespersonEmail,discountPct); doc.save(`Cotizacion_${new Date().toISOString().slice(0,10)}.pdf`);} };
+      img.onerror=()=>{ addPdfContent(doc,prospectName,prospectCompany,projectName,salespersonName,salespersonPhone,salespersonEmail,discountPct); doc.save(`Cotizacion_${new Date().toISOString().slice(0,10)}.pdf`); };
+      img.src=companyInfo.logoUrl||'logotps.png';
+    }
+    function addPdfContent(doc,prospectName,prospectCompany,projectName,salespersonName,salespersonPhone,salespersonEmail,discountPct){
+      const pageH=doc.internal.pageSize.height, pageW=doc.internal.pageSize.width, margin=14; let y=15;
+      // Empresa
+      doc.setFontSize(16).setTextColor('#023047').setFont('helvetica','bold').text(companyInfo.name,margin,y); y+=8;
+      doc.setFontSize(9).setTextColor(100).setFont('helvetica','normal'); if(companyInfo.address){ doc.text(`Dirección: ${companyInfo.address}`,margin,y); y+=4;} if(companyInfo.phone){ doc.text(`Teléfono: ${companyInfo.phone}`,margin,y); y+=4;} if(companyInfo.email){ doc.text(`Email: ${companyInfo.email}`,margin,y); y+=8;}
+      // Cliente y vendedor
+      const startY=y; doc.setFontSize(11).setTextColor('#023047').setFont('helvetica','bold').text('Cliente:',margin,y); y+=5;
+      doc.setFontSize(9).setTextColor(0).setFont('helvetica','normal'); doc.text(`Nombre: ${prospectName}`,margin,y); y+=4; doc.text(`Empresa: ${prospectCompany}`,margin,y); y+=4; doc.text(`Proyecto: ${projectName}`,margin,y); y+=8;
+      y=startY; const sellerX=pageW/2+5; doc.setFontSize(11).setTextColor('#023047').setFont('helvetica','bold').text('Vendedor:',sellerX,y); y+=5;
+      doc.setFontSize(9).setTextColor(0).setFont('helvetica','normal'); doc.text(`Nombre: ${salespersonName}`,sellerX,y); y+=4; doc.text(`Tel: ${salespersonPhone}`,sellerX,y); y+=4; doc.text(`Email: ${salespersonEmail}`,sellerX,y); y+=4; doc.text(`Fecha: ${new Date().toLocaleDateString()}`,sellerX,y);
+      y=Math.max(y,startY+21)+10;
+      // Título tabla
+      doc.setFontSize(14).setTextColor('#023047').setFont('helvetica','bold').text('Detalle de la Cotización',pageW/2,y,{align:'center'}); y+=10;
+      // Tabla body
+      let subtotal=0; const body=cart.map(item=>{ const price=getSafePrice(item.PrecioPublico), total=price*item.quantity; subtotal+=total; return [item.Descripcion, fmtMon(price), item.quantity, fmtMon(total)]; });
+      const discountAmt=subtotal*discountPct/100;
+      const subDesc=subtotal-discountAmt;
+      const tax=subDesc*0.16;
+      const grandTotal=subDesc+tax;
+      const foot=[];
+      foot.push([{content:'Subtotal:',colSpan:3,styles:{halign:'right',fontStyle:'bold'}},{content:fmtMon(subtotal),styles:{halign:'right'}}]);
+      if(discountPct>0){ foot.push([{content:`Descuento (${discountPct}%):`,colSpan:3,styles:{halign:'right',fontStyle:'bold',textColor:[220,38,38]}},{content:`- ${fmtMon(discountAmt)}`,styles:{halign:'right',textColor:[220,38,38]}}]); foot.push([{content:'Subtotal c/Desc.:',colSpan:3,styles:{halign:'right',fontStyle:'bold'}},{content:fmtMon(subDesc),styles:{halign:'right'}}]); }
+      foot.push([{content:'IVA (16%):',colSpan:3,styles:{halign:'right',fontStyle:'bold'}},{content:fmtMon(tax),styles:{halign:'right'}}]);
+      foot.push([{content:'Total:',colSpan:3,styles:{halign:'right',fontStyle:'bold',fontSize:10}},{content:fmtMon(grandTotal),styles:{halign:'right',fontStyle:'bold',fontSize:10}}]);
+      doc.autoTable({ startY:y, head:[['Producto','Precio Unitario','Cantidad','Total']], body, foot, theme:'grid', headStyles:{fillColor:[2,48,71],textColor:255,fontStyle:'bold'}, footStyles:{fillColor:[240,240,240],textColor:0,fontStyle:'bold'}, styles:{fontSize:8,cellPadding:2}, columnStyles:{0:{cellWidth:60},1:{halign:'right',cellWidth:30},2:{halign:'center',cellWidth:20},3:{halign:'right',cellWidth:30}}, didDrawPage:data=>{ doc.setFontSize(8).setTextColor(150).text(`Página ${doc.internal.getNumberOfPages()}`,data.settings.margin.left,pageH-10); doc.text('Generado por TPS Recubrimientos',pageW/2,pageH-10,{align:'center'}); }, margin:{top:10,bottom:20} });
+      // Total en letra
+      const letras = numeroALetras(Math.floor(grandTotal)) + ' pesos ' + String(Math.round((grandTotal%1)*100)).padStart(2,'0') + '/100 M.N.';
+      doc.text(`Total en letra: ${letras}`,14,doc.lastAutoTable.finalY+10);
     }
 
-    // ... resto de funciones: sendWhatsappQuote(), calcularMezcla(), showNotification(), etc., idénticas ...
+    function sendWhatsappQuote(){ const phone=document.getElementById('prospectPhone').value.replace(/[^0-9+]/g,''); if(!phone){ showNotification('Teléfono inválido','bg-yellow-500 text-black'); return;} let formatted=phone.startsWith('+')?phone:`+52${phone}`; let msg=`¡Hola ${document.getElementById('prospectName').value||'Cliente'}! Aquí tu cotización de ${companyInfo.name}:\n\n`; let subtotal=0; cart.forEach(i=>{ const p=getSafePrice(i.PrecioPublico), t=p*i.quantity; subtotal+=t; msg+=`- ${i.Descripcion} (${i.quantity} x ${fmtMon(p)}): ${fmtMon(t)}\n`; }); const discountPct=parseFloat(document.getElementById('globalDiscountPanel').value)||0; const disc=subtotal*discountPct/100; const subDesc=subtotal-disc; const tax=subDesc*0.16; const grand=subDesc+tax; msg+=`\nSubtotal: ${fmtMon(subtotal)}`; if(discountPct>0) msg+=`\nDescuento (${discountPct}%): -${fmtMon(disc)}\nSubtotal c/Desc.: ${fmtMon(subDesc)}`; msg+=`\nIVA (16%): ${fmtMon(tax)}\n*Total:* ${fmtMon(grand)}\n\n`; msg+=`_(Validez: 30 días)_`; window.open(`https://wa.me/${formatted}?text=${encodeURIComponent(msg)}`,'_blank'); showNotification('Abriendo WhatsApp...','bg-blue-500'); }
+
+    // Notificaciones
+    let notifTimeout;
+    function showNotification(msg,bg){ const existing=document.getElementById('toast-notification'); if(existing){ clearTimeout(notifTimeout); existing.remove(); } const div=document.createElement('div'); div.id='toast-notification'; div.className=`fixed bottom-4 right-4 text-white px-4 py-3 rounded-md shadow-lg flex items-center text-sm z-[1200] transition-all duration-300 ease-in-out transform translate-y-full opacity-0 ${bg}`; div.innerHTML=`<i class="fas fa-info-circle mr-2"></i><span>${msg}</span><button class="ml-auto pl-2 text-xl leading-none">×</button>`; document.body.appendChild(div); div.querySelector('button').addEventListener('click',()=>{ clearTimeout(notifTimeout); div.classList.add('translate-y-full','opacity-0'); setTimeout(()=>div.remove(),300); }); setTimeout(()=>div.classList.remove('translate-y-full','opacity-0'),50); notifTimeout=setTimeout(()=>div.querySelector('button').click(),5000); }
   </script>
 </body>
 </html>
